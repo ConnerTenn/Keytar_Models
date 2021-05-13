@@ -30,6 +30,8 @@ class Key:
         pivot = self.Pivot()
         key += pivot
 
+        self.ButtonPost(key)
+
         key = key.edges(cq.selectors.BoxSelector(
             (-self.Width, self.HiddenLength, -self.Height/2+1),
             (self.Width, self.HiddenLength-2*self.WallThickness, -self.Height/2)
@@ -88,6 +90,19 @@ class Key:
         # show_object(post)
 
         return post
+
+    ButtonPostPos = Length-WallThickness - 40
+    ButtonPostLength = 30
+    ButtonPostWidth = WallThickness*2
+    ButtonPostHeight = Height/2-WallThickness + 20
+
+    def ButtonPost(self, keyobj):
+        post = keyobj.faces(">Z[-2]").workplane() \
+            .move(0, self.ButtonPostPos) \
+            .slot2D(self.ButtonPostLength, self.ButtonPostWidth, 90) \
+            .extrude(self.ButtonPostHeight, combine=False)
+
+        show_object(post)
 
 key = Key()
 
