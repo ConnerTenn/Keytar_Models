@@ -23,7 +23,7 @@ class Key:
         key = key.translate((0, self.TotalLength/2 - self.Length, 0))
 
         pivot = self.Pivot()
-        key = key.union(pivot)
+        key += pivot
 
         return key
 
@@ -57,7 +57,7 @@ class Key:
         # show_object(pivot)
 
         pivot = pivot.translate((-self.Width/2,0,0))
-        pivot = pivot.union(pivot.mirror("YZ"))
+        pivot += pivot.mirror("YZ")
 
         return pivot
 
