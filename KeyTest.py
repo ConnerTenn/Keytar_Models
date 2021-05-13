@@ -17,10 +17,12 @@ class Key:
     WallThickness = 4
 
     def __new__(self):
+        self = super().__new__(self)
+
         key = cq.Workplane().box(self.Width, self.TotalLength, self.WallThickness)
         key = key.translate((0, self.TotalLength/2 - self.Length, 0))
 
-        pivot = self.Pivot(self)
+        pivot = self.Pivot()
         key = key.union(pivot)
 
         return key
