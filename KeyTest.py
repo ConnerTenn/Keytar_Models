@@ -32,11 +32,6 @@ class Key:
 
         self.ButtonPost(key)
 
-        key = key.edges(cq.selectors.BoxSelector(
-            (-self.Width, self.HiddenLength, -self.Height/2+1),
-            (self.Width, self.HiddenLength-2*self.WallThickness, -self.Height/2)
-        )).chamfer(self.HookHeight-Small)
-
         return key
 
     PivotPos = cq.Vector(0,-20)
@@ -78,7 +73,10 @@ class Key:
     def SpringHook(self, keyobj):
         post = keyobj.faces("<Z").edges(">Y").workplane(centerOption="CenterOfMass").center(0,self.WallThickness/2) \
             .rect(self.Width, self.WallThickness) \
-            .extrude(self.HookHeight, combine=False)
+            .workplane(offset=self.HookHeight) \
+            .rect(self.WallThickness, self.WallThickness) \
+            .loft(combine=False)
+            # .extrude(self.HookHeight, combine=False)
 
         post = post.faces("<Z").workplane() \
             .circle(self.WallThickness/2) \
@@ -87,6 +85,11 @@ class Key:
             .faces("<Z").workplane() \
             .move(0,-(2-1.5)/2).circle(2/2).extrude(1)
 
+        braceHeight = self.HookHeight+self.Height-self.WallThickness
+        post += cq.Workplane("YZ").center(self.HiddenLength-self.WallThickness, self.Height/2-self.WallThickness) \
+            .lineTo(-braceHeight, 0) \
+            .lineTo(0, -braceHeight) \
+            .close().extrude(self.WallThickness/2, both=True)
         # show_object(post)
 
         return post
