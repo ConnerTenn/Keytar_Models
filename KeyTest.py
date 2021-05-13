@@ -7,6 +7,7 @@ if "show_object" not in globals():
         pass
     show_object = func
 
+Small = 1e-5
 
 class Key:
     Length = 150
@@ -19,11 +20,20 @@ class Key:
     def __new__(self):
         self = super().__new__(self)
 
-        key = cq.Workplane().box(self.Width, self.TotalLength, self.WallThickness)
+        key = cq.Workplane().box(self.Width, self.TotalLength, self.Height)
+        key = key.faces("<Z").shell(-self.WallThickness)
         key = key.translate((0, self.TotalLength/2 - self.Length, 0))
+
+        hook = self.SpringHook(key)
+        key += hook
 
         pivot = self.Pivot()
         key += pivot
+
+        key = key.edges(cq.selectors.BoxSelector(
+            (-self.Width, self.HiddenLength, -self.Height/2+1),
+            (self.Width, self.HiddenLength-2*self.WallThickness, -self.Height/2)
+        )).chamfer(self.HookHeight-Small)
 
         return key
 
@@ -61,6 +71,25 @@ class Key:
 
         return pivot
 
+    HookHeight = 20-Height/2
+
+    def SpringHook(self, keyobj):
+        post = keyobj.faces("<Z").edges(">Y").workplane(centerOption="CenterOfMass").center(0,self.WallThickness/2) \
+            .rect(self.Width, self.WallThickness) \
+            .extrude(self.HookHeight, combine=False)
+
+        post = post.faces("<Z").workplane() \
+            .circle(self.WallThickness/2) \
+            .workplane(offset=3/2) \
+            .circle(1.5/2).loft() \
+            .faces("<Z").workplane() \
+            .move(0,-(2-1.5)/2).circle(2/2).extrude(1)
+
+        # show_object(post)
+
+        return post
+
 key = Key()
 
 show_object(key)
+
