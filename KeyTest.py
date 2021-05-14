@@ -180,3 +180,5 @@ base = Base()
 show_object(key)
 show_object(base)
 
+cq.exporters.export(key, "KeyTest.stl")
+cq.exporters.export(base, "KeyBaseTest.stl")
