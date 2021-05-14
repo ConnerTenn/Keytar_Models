@@ -32,7 +32,7 @@ class Key:
         pivot = self.Pivot()
         key += pivot
 
-        self.ButtonPost(key)
+        key += self.ButtonPost(key)
 
         return key
 
@@ -107,7 +107,8 @@ class Key:
             .slot2D(self.ButtonPostLength, self.ButtonPostWidth, 90) \
             .extrude(self.ButtonPostHeight, combine=False)
 
-        show_object(post)
+        # show_object(post)
+        return post
 
 class Base:
     Length = Key.TotalLength
