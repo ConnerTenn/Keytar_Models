@@ -116,7 +116,8 @@ class Base:
     WallThickness = Key.WallThickness
 
     PivotHeight = 20
-    HookPos = 20
+    HookStartPos = 20
+    HookCount = 10
 
     def __new__(self):
         self = super().__new__(self)
@@ -125,6 +126,7 @@ class Base:
             .faces("<Z").shell(-self.WallThickness) \
             .translate((0, Key.TotalLength/2 - Key.Length, 0))
 
+        base += self.SpringHooks(base)
         base += self.Pivot(base)
 
         return base.translate((0, 0, -self.PivotHeight+Key.PivotPos.y))
@@ -143,6 +145,20 @@ class Base:
         # show_object(pivot)
 
         return pivot
+
+    def SpringHooks(self, base):
+        hook = base.faces(">Z").workplane() \
+            .circle(self.WallThickness/2) \
+            .workplane(offset=3/2) \
+            .circle(1.5/2).loft(combine=False) \
+            .faces(">Z").workplane() \
+            .move(0,-(2-1.5)/2).circle(2/2).extrude(1)
+
+        hooks = cq.Workplane()
+        for i in range(self.HookCount):
+            hooks += hook.translate((0,self.HookStartPos-i*10,0))
+
+        return hooks
 
 
 key = Key()
