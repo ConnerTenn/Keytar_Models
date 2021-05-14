@@ -126,10 +126,12 @@ class Base:
             .faces("<Z").shell(-self.WallThickness) \
             .translate((0, Key.TotalLength/2 - Key.Length, 0))
 
-        base += self.SpringHooks(base)
-        base += self.Pivot(base)
+        combined = base
+        combined += self.SpringHooks(base)
+        combined += self.KeyStopper(base)
+        combined += self.Pivot(base)
 
-        return base.translate((0, 0, -self.PivotHeight+Key.PivotPos.y))
+        return combined.translate((0, 0, -self.PivotHeight+Key.PivotPos.y))
     
     def Pivot(self, base):
         pivot = base.faces("<X").workplane() \
@@ -159,6 +161,14 @@ class Base:
             hooks += hook.translate((0,self.HookStartPos-i*10,0))
 
         return hooks
+
+    def KeyStopper(self, base):
+        stopper = base.faces(">Z").workplane() \
+            .move(-Key.Width/2+self.WallThickness/2, Key.HiddenLength*0.6) \
+            .rect(self.WallThickness,3*self.WallThickness).mirrorY() \
+            .extrude(abs(Key.PivotPos.y) + self.PivotHeight - (self.Height+Key.Height)/2 - Key.Padding, combine=False)
+
+        return stopper
 
 
 key = Key()
