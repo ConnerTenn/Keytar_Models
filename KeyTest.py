@@ -10,7 +10,7 @@ if "show_object" not in globals():
 Small = 1e-5
 
 class Key:
-    Length = 150
+    Length = 100
     HiddenLength = 50
     TotalLength = Length + HiddenLength
     Width = 23.5
@@ -36,7 +36,7 @@ class Key:
 
         return key
 
-    PivotPos = cq.Vector(0,-20)
+    PivotPos = cq.Vector(0,-10)
     PivotSize = 10
     PivotGap = PivotSize-4
 
@@ -96,10 +96,10 @@ class Key:
 
         return post
 
-    ButtonPostPos = Length-WallThickness - 40
-    ButtonPostLength = 30
-    ButtonPostWidth = WallThickness*2
-    ButtonPostHeight = Height/2-WallThickness + 20
+    ButtonPostPos = Length-WallThickness - 20
+    ButtonPostLength = 20
+    ButtonPostWidth = WallThickness*1.5
+    ButtonPostHeight = Height/2-WallThickness + 10
 
     def ButtonPost(self, keyobj):
         post = keyobj.faces(">Z[-2]").workplane() \
@@ -115,10 +115,6 @@ class Base:
     Height = Key.Height
     WallThickness = Key.WallThickness
 
-    PivotHeight = 20
-    HookStartPos = 20
-    HookCount = 10
-
     def __new__(self):
         self = super().__new__(self)
 
@@ -132,6 +128,9 @@ class Base:
         combined += self.Pivot(base)
 
         return combined.translate((0, 0, -self.PivotHeight+Key.PivotPos.y))
+
+
+    PivotHeight = 20
     
     def Pivot(self, base):
         pivot = base.faces("<X").workplane() \
@@ -147,6 +146,10 @@ class Base:
         # show_object(pivot)
 
         return pivot
+
+
+    HookStartPos = 20
+    HookCount = 9
 
     def SpringHooks(self, base):
         hook = base.faces(">Z").workplane() \
