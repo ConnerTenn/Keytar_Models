@@ -17,6 +17,8 @@ class Key:
     Height = 10
     WallThickness = 4
 
+    Padding = 0.3
+
     def __new__(self):
         self = super().__new__(self)
 
@@ -47,7 +49,7 @@ class Key:
             .close()
 
         pivot = sketch.extrude(self.WallThickness).faces(">X").workplane() \
-            .move(self.PivotPos.x, self.PivotPos.y).hole(self.PivotSize)
+            .move(self.PivotPos.x, self.PivotPos.y).hole(self.PivotSize+self.Padding*2)
         cutline = pivot.faces(">X").workplane() \
             .center(self.PivotPos.x, self.PivotPos.y) \
             .lineTo(-sin(pi/2 * self.PivotGap/self.PivotSize)*self.PivotSize/2, -cos(pi/2 * self.PivotGap/self.PivotSize)*self.PivotSize/2) \
@@ -107,7 +109,45 @@ class Key:
 
         show_object(post)
 
+class Base:
+    Length = Key.TotalLength
+    Width = Key.Width+1
+    Height = Key.Height
+    WallThickness = Key.WallThickness
+
+    PivotHeight = 20
+    HookPos = 20
+
+    def __new__(self):
+        self = super().__new__(self)
+
+        base = cq.Workplane().box(self.Width, self.Length, self.Height) \
+            .faces("<Z").shell(-self.WallThickness) \
+            .translate((0, Key.TotalLength/2 - Key.Length, 0))
+
+        base += self.Pivot(base)
+
+        return base.translate((0, 0, -self.PivotHeight+Key.PivotPos.y))
+    
+    def Pivot(self, base):
+        pivot = base.faces("<X").workplane() \
+            .move(0, (self.PivotHeight/2+Key.PivotSize/2 + self.Height/2)/2) \
+            .rect(Key.PivotSize, self.PivotHeight+self.Height).extrude(self.WallThickness, combine=False) \
+            .edges(">Z and |X").fillet(Key.PivotSize/(2+Small))
+
+        pivot += pivot.mirror("YZ")
+
+        pivot += cq.Workplane("YZ").move(0, self.PivotHeight) \
+            .circle(Key.PivotSize/2).extrude(self.Width/2, both=True)
+
+        # show_object(pivot)
+
+        return pivot
+
+
 key = Key()
+base = Base()
 
 show_object(key)
+show_object(base)
 
