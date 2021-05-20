@@ -26,8 +26,8 @@ class Key:
         key -= self.PivotCut()
         key -= self.SpringCut()
 
-        angle=tan(self.Travel/(self.Length/2+self.PivotPos.x))*180/pi
-        key = key.rotate((0,self.PivotPos.x,0), (1,self.PivotPos.x,0), angle)
+        # angle=tan(self.Travel/(self.Length/2+self.PivotPos.x))*180/pi
+        # key = key.rotate((0,self.PivotPos.x,0), (1,self.PivotPos.x,0), angle)
 
         return key
 
@@ -70,7 +70,7 @@ class Base:
 
         base += self.Pivot()
         base -= self.SpringCut()
-
+        base += self.KeyStopMount()
 
         return base.translate((0,0,-Key.Height/2-self.Height/2-Key.Travel))
 
@@ -90,13 +90,37 @@ class Base:
 
         return cut
 
+    KeyStopPos = cq.Vector(20, 0.3)
+
+    def KeyStopMount(self):
+        mount = cq.Workplane("XY").move(self.Width/2+self.WallThickness/2, self.KeyStopPos.x) \
+            .rect(self.WallThickness, 4*self.WallThickness).mirrorY() \
+            .extrude(self.Height+Key.Travel+Key.Height+self.KeyStopPos.y)
+
+        # show_object(mount)
+
+        return mount.translate((0,0,-self.Height/2))
+
+class KeyStop:
+    def __new__(self):
+        self = super().__new__(self)
+
+        keystop = cq.Workplane().box(Base.Width+Base.WallThickness*2, Base.WallThickness*4, Base.WallThickness) \
+            .translate((0, Base.KeyStopPos.x, Base.Height/2+Base.WallThickness/2+Base.KeyStopPos.y))
+
+        return keystop
+
+
 
 key = Key()
 base = Base()
+keystop = KeyStop()
 
 show_object(key)
 show_object(base)
+show_object(keystop)
 
 cq.exporters.export(key, "KeyTest2.stl")
 cq.exporters.export(base, "KeyBaseTest2.stl")
+cq.exporters.export(keystop, "KeyStopTest2.stl")
 
