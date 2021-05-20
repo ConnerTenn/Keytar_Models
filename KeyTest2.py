@@ -10,29 +10,33 @@ if "show_object" not in globals():
 Small = 1e-5
 
 class Key:
-    Length = 120
+    ExposedLength = 100
+    HiddenLength = 50
     Width = 23.5
     Height = 10
     WallThickness = 4
+
+    TotalLength = ExposedLength+HiddenLength
 
     Travel = 10
 
     def __new__(self):
         self = super().__new__(self)
 
-        key = cq.Workplane().box(self.Width, self.Length, self.Height) \
+        key = cq.Workplane().box(self.Width, self.TotalLength, self.Height) \
+            .translate((0,self.TotalLength/2-self.ExposedLength,0)) \
             .faces("<Z").shell(-self.WallThickness)
 
         key -= self.PivotCut()
         key -= self.SpringCut()
 
-        # angle=tan(self.Travel/(self.Length/2+self.PivotPos.x))*180/pi
+        # angle=tan(self.Travel/(self.ExposedLength+self.PivotPos.x))*180/pi
         # key = key.rotate((0,self.PivotPos.x,0), (1,self.PivotPos.x,0), angle)
 
         return key
 
 
-    PivotPos = cq.Vector(40, 0) #offset from center
+    PivotPos = cq.Vector(25, 0) #offset from center
 
     def PivotCut(self):
         cut = cq.Workplane("YZ").move(self.PivotPos.x, self.PivotPos.y) \
@@ -44,7 +48,7 @@ class Key:
         return cut
 
     SpringDiameter = 3
-    SpringPos = Length/2-WallThickness-(SpringDiameter+1)/2-2
+    SpringPos = HiddenLength-WallThickness-(SpringDiameter+1)/2-2
 
     def SpringCut(self):
         cut = cq.Workplane("XY") \
@@ -57,7 +61,7 @@ class Key:
 
 
 class Base:
-    Length = Key.Length
+    Length = Key.TotalLength
     Width = Key.Width+1
     Height = Key.Height
     WallThickness = Key.WallThickness
@@ -66,6 +70,7 @@ class Base:
         self = super().__new__(self)
 
         base = cq.Workplane().box(self.Width, self.Length, self.Height) \
+            .translate((0,Key.TotalLength/2-Key.ExposedLength,0)) \
             .faces("<Z").shell(-self.WallThickness)
 
         base += self.Pivot()
@@ -90,12 +95,12 @@ class Base:
 
         return cut
 
-    KeyStopPos = cq.Vector(20, 0.3)
+    KeyStopPadding = 0.3
 
     def KeyStopMount(self):
-        mount = cq.Workplane("XY").move(self.Width/2+self.WallThickness/2, self.KeyStopPos.x) \
+        mount = cq.Workplane("XY").move(self.Width/2+self.WallThickness/2, self.WallThickness*2) \
             .rect(self.WallThickness, 4*self.WallThickness).mirrorY() \
-            .extrude(self.Height+Key.Travel+self.KeyStopPos.y)
+            .extrude(self.Height+Key.Travel+self.KeyStopPadding)
 
         # show_object(mount)
 
@@ -110,7 +115,7 @@ class KeyStop:
             .rect(Base.WallThickness, 4*Base.WallThickness).mirrorY() \
             .extrude(Key.Height)
 
-        return keystop.translate((0, Base.KeyStopPos.x, Base.Height/2+Base.WallThickness/2+Base.KeyStopPos.y))
+        return keystop.translate((0, Base.WallThickness*2, Base.Height/2+Base.WallThickness/2+Base.KeyStopPadding))
 
 
 
