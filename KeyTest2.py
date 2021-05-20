@@ -81,9 +81,12 @@ class Base:
 
     
     def Pivot(self):
+        spikeHeight = 7
         pivot = cq.Workplane("YZ").move(Key.PivotPos.x, 0) \
             .move(5, self.Height/2) \
-            .line(0, Key.Travel-self.Height/2+Key.PivotPos.y).line(-5,10).line(-5,-10).line(0,-(Key.Travel-self.Height/2+Key.PivotPos.y)).close() \
+            .line(0, Key.Travel+Key.Height/2+Key.PivotPos.y-spikeHeight) \
+            .line(-5,spikeHeight).line(-5,-spikeHeight) \
+            .line(0,-(Key.Travel+Key.Height/2+Key.PivotPos.y-spikeHeight)).close() \
             .extrude(self.Width/2, both=True)
 
         return pivot
