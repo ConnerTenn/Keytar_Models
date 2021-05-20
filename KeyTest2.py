@@ -127,7 +127,7 @@ show_object(key)
 show_object(base)
 show_object(keystop)
 
-cq.exporters.export(key, "KeyTest2.stl")
-cq.exporters.export(base, "KeyBaseTest2.stl")
-cq.exporters.export(keystop, "KeyStopTest2.stl")
+cq.exporters.export(key, "Export/KeyTest2.stl")
+cq.exporters.export(base, "Export/KeyBaseTest2.stl")
+cq.exporters.export(keystop, "Export/KeyStopTest2.stl")
 
