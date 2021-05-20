@@ -98,7 +98,7 @@ class Base:
 
         return cut
 
-    KeyStopPadding = 0.3
+    KeyStopPadding = 0.1
 
     def KeyStopMount(self):
         mount = cq.Workplane("XY").move(self.Width/2+self.WallThickness/2, self.WallThickness*2) \
