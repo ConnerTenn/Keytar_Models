@@ -95,7 +95,7 @@ class Base:
     def KeyStopMount(self):
         mount = cq.Workplane("XY").move(self.Width/2+self.WallThickness/2, self.KeyStopPos.x) \
             .rect(self.WallThickness, 4*self.WallThickness).mirrorY() \
-            .extrude(self.Height+Key.Travel+Key.Height+self.KeyStopPos.y)
+            .extrude(self.Height+Key.Travel+self.KeyStopPos.y)
 
         # show_object(mount)
 
@@ -106,9 +106,11 @@ class KeyStop:
         self = super().__new__(self)
 
         keystop = cq.Workplane().box(Base.Width+Base.WallThickness*2, Base.WallThickness*4, Base.WallThickness) \
-            .translate((0, Base.KeyStopPos.x, Base.Height/2+Base.WallThickness/2+Base.KeyStopPos.y))
+            .faces("<Z").workplane().move(Base.Width/2+Base.WallThickness/2, 0) \
+            .rect(Base.WallThickness, 4*Base.WallThickness).mirrorY() \
+            .extrude(Key.Height)
 
-        return keystop
+        return keystop.translate((0, Base.KeyStopPos.x, Base.Height/2+Base.WallThickness/2+Base.KeyStopPos.y))
 
 
 
