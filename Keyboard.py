@@ -1,5 +1,6 @@
 import cadquery as cq
 import glm
+import time
 
 #Stop VS-Code undefined function error
 if "show_object" not in globals():
@@ -10,16 +11,43 @@ if "show_object" not in globals():
 
 class Octave(object):
     Width = 24*7
+    KeySpacing = 1.5
 
     def __new__(self):
         self = super().__new__(self)
+
+        self.Keys = [
+            CKey(),
+            BlackKey(),
+            DKey(),
+            BlackKey(),
+            EKey(),
+            FKey(),
+            BlackKey(),
+            GKey(),
+            BlackKey(),
+            AKey(),
+            BlackKey(),
+            BKey(),
+            BlackKey()
+        ]
+
+        for i, key in enumerate(self.Keys):
+            self.Keys[i] = key.translate((i*self.Width/12,0,0))
+
+        return self
+
+
+    def Show(self):
+        for key in self.Keys:
+            show_object(key)
 
 
 
 class KeyCommon(object):
     MountLength = 40
     HiddenLength = 50
-    Width = Octave.Width/12
+    Width = Octave.Width/12-Octave.KeySpacing
     Height = 10
     WallThickness = 4
 
@@ -60,7 +88,66 @@ class KeyCommon(object):
         return cut
 
 
-common = KeyCommon()
+class BlackKey(object):
+    def __new__(self):
+        self = super().__new__(self)
 
+        key = KeyCommon()
+        return key
+
+class CKey(object):
+    def __new__(self):
+        self = super().__new__(self)
+
+        key = KeyCommon()
+        return key
+
+class DKey(object):
+    def __new__(self):
+        self = super().__new__(self)
+
+        key = KeyCommon()
+        return key
+
+class EKey(object):
+    def __new__(self):
+        self = super().__new__(self)
+
+        key = KeyCommon()
+        return key
+
+class FKey(object):
+    def __new__(self):
+        self = super().__new__(self)
+
+        key = KeyCommon()
+        return key
+
+class GKey(object):
+    def __new__(self):
+        self = super().__new__(self)
+
+        key = KeyCommon()
+        return key
+
+class AKey(object):
+    def __new__(self):
+        self = super().__new__(self)
+
+        key = KeyCommon()
+        return key
+
+class BKey(object):
+    def __new__(self):
+        self = super().__new__(self)
+
+        key = KeyCommon()
+        return key
+
+
+common = KeyCommon()
 show_object(common)
+
+octave = Octave()
+octave.Show()
 
