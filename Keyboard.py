@@ -12,6 +12,7 @@ if "show_object" not in globals():
 WallThickness = 4
 Small = 1e-5
 
+BitSize = 3
 
 class Octave(object):
     Width = 24*7
@@ -110,7 +111,7 @@ class WhiteKey(object):
         return cq.Vector(self.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
     def Show(self):
-        show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255)})
+        show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255), "alpha":0.5})
 
 #Black key is positioned relative to the center of the white key
 class BlackKey(object):
@@ -128,7 +129,7 @@ class BlackKey(object):
         return cq.Vector(WhiteKey.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
     def Show(self):
-        show_object(self.Obj().translate(self.GetPosition()), options={"color":(20,20,20)})
+        show_object(self.Obj().translate(self.GetPosition()), options={"color":(20,20,20), "alpha":0.5})
 
 
 #Initialize the positioning of all the white keys
@@ -189,6 +190,43 @@ Octave.KeyBaseWidths["G"] = Octave.KeyOffsets["G#"]-Octave.KeyOffsets["F#"] - Bl
 Octave.KeyBaseWidths["A"] = Octave.KeyOffsets["A#"]-Octave.KeyOffsets["G#"] - BlackKey.KeyBaseWidth - Octave.KeySpacing*2
 
 
+class KeySpacer(object):
+
+    WallSize = 7
+    WallThick = 3
+    Gap = 0.2
+
+    def Obj(self):
+        align = cq.Workplane("YZ").move(KeyCommon.PivotPos.x, 0) \
+        .move(self.WallSize+5, self.Gap) \
+        .line(0, KeyCommon.Travel-self.Gap) \
+        .tangentArcPoint((-self.WallSize*2-5*2,0)) \
+        .line(0, -KeyCommon.Travel+self.Gap) \
+        .close().extrude(self.WallThick/2, both=True)
+
+        align -= self.PivotCut()
+
+        # align = align.edges("<Z and |X and <Y[-1]").fillet(BitSize)
+        align = align.edges(
+            cq.selectors.SumSelector(
+                cq.selectors.NearestToPointSelector((0,KeyCommon.PivotPos.x-1,0)),
+                cq.selectors.NearestToPointSelector((0,KeyCommon.PivotPos.x+1,0))
+            )).fillet(BitSize/2)
+
+        return align
+
+    def PivotCut(self):
+        spikeHeight = 7
+        pivot = cq.Workplane("YZ").move(KeyCommon.PivotPos.x, 0) \
+            .move(5+self.Gap, 0) \
+            .line(0, KeyCommon.Travel+KeyCommon.Height/2+KeyCommon.PivotPos.y-spikeHeight) \
+            .line(-5-self.Gap,spikeHeight+self.Gap).line(-5-self.Gap,-spikeHeight-self.Gap) \
+            .line(0,-(KeyCommon.Travel+KeyCommon.Height/2+KeyCommon.PivotPos.y-spikeHeight)).close() \
+            .extrude(self.WallThick/2, both=True)
+        
+        return pivot
+
+
 class Base(object):
     Height = WallThickness
     Width = Octave.Width+5
@@ -197,6 +235,13 @@ class Base(object):
             .translate((0, KeyCommon.HiddenLength-KeyCommon.TotalLength/2, 0))
 
         base += self.Pivot()
+
+        # Fillet along Pivot
+        base = base.edges(cq.selectors.BoxSelector(
+            (-self.Width-1, KeyCommon.PivotPos.x-5-1, 0),
+            (self.Width+1, KeyCommon.PivotPos.x+5+1, self.Height),
+            ()
+        )).fillet(BitSize/2-Small)
 
         return base
 
@@ -211,11 +256,70 @@ class Base(object):
         
         return pivot
 
+
+    def KeySpacers(self):
+        align = KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["C"]-Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["C"]+Octave.KeyBaseWidths["C"]+Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2-Octave.KeyBaseWidths["D"]/2-Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2+Octave.KeyBaseWidths["D"]/2+Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["E"]+WhiteKey.Width-Octave.KeyBaseWidths["E"]-Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["F"]-Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["F"]+Octave.KeyBaseWidths["F"]+Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]-Octave.KeyBaseWidths["G"]/2-Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]+Octave.KeyBaseWidths["G"]/2+Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]-Octave.KeyBaseWidths["A"]/2-Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]+Octave.KeyBaseWidths["A"]/2+Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["B"]+WhiteKey.Width-Octave.KeyBaseWidths["B"]-Octave.KeySpacing/2, 0, 0)
+        )
+
+        align += KeySpacer().Obj().translate(
+            (Octave.KeyOffsets["B"]+WhiteKey.Width+Octave.KeySpacing/2, 0, 0)
+        )
+
+        return align.translate((-Octave.Width/2, 0, self.Height/2))
+
+
     def GetPosition(self):
         return cq.Vector(Octave.Width/2, 0, -KeyCommon.Height/2-self.Height/2-KeyCommon.Travel)
 
     def Show(self):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(0,127,127)})
+
+        show_object(self.KeySpacers().translate(self.GetPosition()))
 
 
 Octave().Show()
