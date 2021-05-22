@@ -9,6 +9,10 @@ if "show_object" not in globals():
     show_object = func
 
 
+WallThickness = 4
+Small = 1e-5
+
+
 class Octave(object):
     Width = 24*7
     KeySpacing = 1.5
@@ -45,10 +49,10 @@ class KeyCommon(object):
     HiddenLength = 50
     Width = Octave.Width/12-Octave.KeySpacing
     Height = 10
-    WallThickness = 4
 
-    def __init__(self, mountlen):
+    def __init__(self, mountlen, mountwidth):
         self.MountLength = mountlen
+        self.Width = mountwidth
         self.TotalLength = self.MountLength+self.HiddenLength
 
     def Obj(self):
@@ -58,7 +62,7 @@ class KeyCommon(object):
         common -= self.PivotCut()
         common -= self.SpringCut()
 
-        return common
+        return common.translate((self.Width/2,0,0))
 
 
     PivotPos = cq.Vector(25, 0) #offset from center
@@ -86,18 +90,20 @@ class KeyCommon(object):
 
 class BlackKey(object):
     MountLength = 60-Octave.KeySpacing
+    MountWidth = Octave.Width/12-Octave.KeySpacing
 
     def Obj(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = KeyCommon(self.MountLength, self.MountWidth).Obj()
         return key
 
 class WhiteKey(object):
     MountLength = 60
+    MountWidth = Octave.Width/12-Octave.KeySpacing
     ExtendedLength = 40
     Width = Octave.Width/7-Octave.KeySpacing
 
     def Base(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = KeyCommon(self.MountLength, self.MountWidth).Obj()
 
         return key
 
@@ -105,7 +111,7 @@ class WhiteKey(object):
         key = cq.Workplane().box(self.Width, self.ExtendedLength, KeyCommon.Height) \
             .translate((0, -(self.MountLength+self.ExtendedLength/2), 0))
 
-        return key
+        return key.translate((KeyCommon.Width/2,0,0))
 
 class CKey(WhiteKey):
     def Obj(self):
@@ -143,6 +149,17 @@ class BKey(WhiteKey):
         return key
 
 
+class Base(object):
+    Height = WallThickness
+    def Obj(self):
+        base = cq.Workplane().box(Octave.Width, KeyCommon.HiddenLength+WhiteKey.ExtendedLength, self.Height)
+
+        return base.translate((Octave.Width/2,0,-KeyCommon.Height/2-self.Height/2-10))
+
+
 octave = Octave().Obj()
 octave.Show()
+
+base = Base().Obj()
+show_object(base)
 
