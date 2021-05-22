@@ -2,6 +2,8 @@ import cadquery as cq
 import glm
 import time
 
+t1 = time.time()
+
 #Stop VS-Code undefined function error
 if "show_object" not in globals():
     def func(*args, **kwargs):
@@ -56,19 +58,19 @@ class KeyCommon(object):
         common = cq.Workplane().box(self.Width, self.TotalLength, self.Height) \
             .translate((0,self.TotalLength/2-self.KeyBaseLength,0))
 
-        common -= self.PivotCut()
-        common -= self.SpringCut()
-        common -= self.SpacerCut(common)
+        common = self.SpringCut(common)
+        common = self.SpacerCut(common)
+        common = self.PivotCut(common)
 
         return common
 
 
     PivotPos = cq.Vector(25, 0) #offset from center
 
-    def PivotCut(self):
-        cut = cq.Workplane("YZ").move(self.PivotPos.x, self.PivotPos.y) \
+    def PivotCut(self, common):
+        cut = common.faces(">X").workplane().move(self.PivotPos.x, self.PivotPos.y-self.Height/2) \
             .line(10,-10).line(-20,0).close() \
-            .extrude(self.Width/2, both=True)
+            .cutThruAll()
 
         return cut
 
@@ -76,8 +78,7 @@ class KeyCommon(object):
         width = (KeySpacer.WallThick-Octave.KeySpacing)/2+KeySpacer.Gap
         cut = common.faces(">Z").workplane().move(-self.Width/2+width/2, self.PivotPos.x) \
             .rect(width,KeySpacer.WallSize*2+5*2+5).mirrorY() \
-            .extrude(-self.Height, combine=False)
-        
+            .cutThruAll()
 
         return cut
 
@@ -85,10 +86,10 @@ class KeyCommon(object):
     SpringDiameter = 3
     SpringPos = HiddenLength-WallThickness-(SpringDiameter+1)/2-2
 
-    def SpringCut(self):
-        cut = cq.Workplane("XY") \
+    def SpringCut(self, common):
+        cut = common.faces(">Z").workplane() \
             .move(self.SpringDiameter, self.SpringPos).circle((self.SpringDiameter+1)/2).mirrorY() \
-            .extrude(self.Height/2, both=True)
+            .cutThruAll()
 
         return cut
 
@@ -267,60 +268,62 @@ class Base(object):
         return pivot
 
 
-    def KeySpacers(self):
-        align = KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["C"]-Octave.KeySpacing/2, 0, 0)
-        )
+    def ShowKeySpacers(self):
+        pos = self.GetPosition() + cq.Vector((-Octave.Width/2, 0, self.Height/2))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["C"]+Octave.KeyBaseWidths["C"]+Octave.KeySpacing/2, 0, 0)
-        )
+        spacer = KeySpacer().Obj()
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2-Octave.KeyBaseWidths["D"]/2-Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["C"]-Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2+Octave.KeyBaseWidths["D"]/2+Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["C"]+Octave.KeyBaseWidths["C"]+Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["E"]+WhiteKey.Width-Octave.KeyBaseWidths["E"]-Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2-Octave.KeyBaseWidths["D"]/2-Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["F"]-Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2+Octave.KeyBaseWidths["D"]/2+Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["F"]+Octave.KeyBaseWidths["F"]+Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["E"]+WhiteKey.Width-Octave.KeyBaseWidths["E"]-Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]-Octave.KeyBaseWidths["G"]/2-Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["F"]-Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]+Octave.KeyBaseWidths["G"]/2+Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["F"]+Octave.KeyBaseWidths["F"]+Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]-Octave.KeyBaseWidths["A"]/2-Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]-Octave.KeyBaseWidths["G"]/2-Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]+Octave.KeyBaseWidths["A"]/2+Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]+Octave.KeyBaseWidths["G"]/2+Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["B"]+WhiteKey.Width-Octave.KeyBaseWidths["B"]-Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]-Octave.KeyBaseWidths["A"]/2-Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        align += KeySpacer().Obj().translate(
-            (Octave.KeyOffsets["B"]+WhiteKey.Width+Octave.KeySpacing/2, 0, 0)
-        )
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]+Octave.KeyBaseWidths["A"]/2+Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
-        return align.translate((-Octave.Width/2, 0, self.Height/2))
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["B"]+WhiteKey.Width-Octave.KeyBaseWidths["B"]-Octave.KeySpacing/2, 0, 0) + pos
+        ))
+
+        show_object(spacer.translate(
+            cq.Vector(Octave.KeyOffsets["B"]+WhiteKey.Width+Octave.KeySpacing/2, 0, 0) + pos
+        ))
 
 
     def GetPosition(self):
@@ -329,9 +332,19 @@ class Base(object):
     def Show(self):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(0,127,127)})
 
-        show_object(self.KeySpacers().translate(self.GetPosition()))
+        self.ShowKeySpacers()
 
-
+t2 = time.time()
 Octave().Show()
+t3 = time.time()
 Base().Show()
+t4 = time.time()
+
+print()
+print("Runtime:")
+print(F"    Initialize: {t2-t1:.6f}s")
+print(F"    Octave:     {t3-t2:.6f}s")
+print(F"    Base:       {t4-t3:.6f}s")
+print(F"    :: Total :: {t4-t1:.6f}s")
+print()
 
