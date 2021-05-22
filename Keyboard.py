@@ -189,13 +189,28 @@ Octave.KeyBaseWidths["A"] = Octave.KeyOffsets["A#"]-Octave.KeyOffsets["G#"] - Bl
 
 class Base(object):
     Height = WallThickness
+    Width = Octave.Width+5
     def Obj(self):
-        base = cq.Workplane().box(Octave.Width, KeyCommon.TotalLength, self.Height)
+        base = cq.Workplane().box(self.Width, KeyCommon.TotalLength, self.Height) \
+            .translate((0, KeyCommon.HiddenLength-KeyCommon.TotalLength/2, 0))
+
+        base += self.Pivot()
 
         return base
 
+    def Pivot(self):
+        spikeHeight = 7
+        pivot = cq.Workplane("YZ").move(KeyCommon.PivotPos.x, 0) \
+            .move(5, self.Height/2) \
+            .line(0, KeyCommon.Travel+KeyCommon.Height/2+KeyCommon.PivotPos.y-spikeHeight) \
+            .line(-5,spikeHeight).line(-5,-spikeHeight) \
+            .line(0,-(KeyCommon.Travel+KeyCommon.Height/2+KeyCommon.PivotPos.y-spikeHeight)).close() \
+            .extrude(self.Width/2, both=True)
+        
+        return pivot
+
     def GetPosition(self):
-        return (Octave.Width/2, KeyCommon.HiddenLength-KeyCommon.TotalLength/2, -KeyCommon.Height/2-self.Height/2-KeyCommon.Travel)
+        return (Octave.Width/2, 0, -KeyCommon.Height/2-self.Height/2-KeyCommon.Travel)
 
     def Show(self):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(0,127,127)})
