@@ -300,55 +300,55 @@ class Base(object):
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["C"]-Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["C"]+Octave.KeyBaseWidths["C"]+Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2-Octave.KeyBaseWidths["D"]/2-Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2+Octave.KeyBaseWidths["D"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["E"]+WhiteKey.Width-Octave.KeyBaseWidths["E"]-Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["F"]-Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["F"]+Octave.KeyBaseWidths["F"]+Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]-Octave.KeyBaseWidths["G"]/2-Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]+Octave.KeyBaseWidths["G"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]-Octave.KeyBaseWidths["A"]/2-Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]+Octave.KeyBaseWidths["A"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["B"]+WhiteKey.Width-Octave.KeyBaseWidths["B"]-Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["B"]+WhiteKey.Width+Octave.KeySpacing/2, 0, 0) + pos
-        ))
+        ), options={"alpha":0.5})
 
 
     def GetPosition(self):
