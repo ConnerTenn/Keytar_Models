@@ -17,7 +17,7 @@ class Octave(object):
     Width = 24*7
     KeySpacing = 1.5
 
-    def Show(self):
+    def __init__(self):
         self.Keys = [
             WhiteKey("C"),
             BlackKey("C#"),
@@ -33,6 +33,7 @@ class Octave(object):
             WhiteKey("B")
         ]
 
+    def Show(self):
         for key in self.Keys:
             key.Show()
 
@@ -98,7 +99,7 @@ class WhiteKey(object):
     def KeyBase(self):
         keybase = KeyCommon(self.KeyBaseLength, Octave.KeyBaseWidths[self.Key]).Obj()
 
-        return keybase.translate((Octave.KeyBaseOffsets[self.Key],0,0))
+        return keybase.translate((Octave.KeyBaseOffsets[self.Key], 0, 0))
 
     def Extension(self):
         keyextend = cq.Workplane().box(self.Width, self.ExtendedLength, KeyCommon.Height)
@@ -106,11 +107,12 @@ class WhiteKey(object):
         return keyextend.translate((0, -(self.KeyBaseLength+self.ExtendedLength/2), 0))
 
     def GetPosition(self):
-        return (self.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
+        return cq.Vector(self.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
     def Show(self):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255)})
 
+#Black key is positioned relative to the center of the white key
 class BlackKey(object):
     KeyBaseLength = WhiteKey.KeyBaseLength-Octave.KeySpacing
     KeyBaseWidth = Octave.Width/12-Octave.KeySpacing
@@ -123,7 +125,7 @@ class BlackKey(object):
         return key
 
     def GetPosition(self):
-        return (WhiteKey.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
+        return cq.Vector(WhiteKey.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
     def Show(self):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(20,20,20)})
@@ -210,7 +212,7 @@ class Base(object):
         return pivot
 
     def GetPosition(self):
-        return (Octave.Width/2, 0, -KeyCommon.Height/2-self.Height/2-KeyCommon.Travel)
+        return cq.Vector(Octave.Width/2, 0, -KeyCommon.Height/2-self.Height/2-KeyCommon.Travel)
 
     def Show(self):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(0,127,127)})
