@@ -39,22 +39,21 @@ class Octave(object):
 
 class KeyCommon(object):
     HiddenLength = 50
-    Width = Octave.Width/12-Octave.KeySpacing
     Height = 10
 
-    def __init__(self, mountlen, mountwidth):
-        self.MountLength = mountlen
-        self.Width = mountwidth
-        self.TotalLength = self.MountLength+self.HiddenLength
+    def __init__(self, keybaseLength, keybaseWidth):
+        self.KeyBaseLength = keybaseLength
+        self.Width = keybaseWidth
+        self.TotalLength = self.KeyBaseLength+self.HiddenLength
 
     def Obj(self):
         common = cq.Workplane().box(self.Width, self.TotalLength, self.Height) \
-            .translate((0,self.TotalLength/2-self.MountLength,0))
+            .translate((0,self.TotalLength/2-self.KeyBaseLength,0))
 
         common -= self.PivotCut()
         common -= self.SpringCut()
 
-        return common#.translate((self.Width/2,0,0))
+        return common
 
 
     PivotPos = cq.Vector(25, 0) #offset from center
@@ -63,8 +62,6 @@ class KeyCommon(object):
         cut = cq.Workplane("YZ").move(self.PivotPos.x, self.PivotPos.y) \
             .line(10,-10).line(-20,0).close() \
             .extrude(self.Width/2, both=True)
-
-        # show_object(cut)
 
         return cut
 
@@ -81,7 +78,7 @@ class KeyCommon(object):
 
 
 class WhiteKey(object):
-    MountLength = 60
+    KeyBaseLength = 60
     ExtendedLength = 40
     Width = Octave.Width/7-Octave.KeySpacing
 
@@ -90,20 +87,19 @@ class WhiteKey(object):
 
 
     def Obj(self):
-        key = self.Base() + self.Extension()
+        key = self.KeyBase() + self.Extension()
 
         return key
 
-    def Base(self):
-        key = KeyCommon(self.MountLength, Octave.BaseWidths[self.Key]).Obj()
+    def KeyBase(self):
+        keybase = KeyCommon(self.KeyBaseLength, Octave.KeyBaseWidths[self.Key]).Obj()
 
-        return key.translate((Octave.BaseOffsets[self.Key],0,0))
+        return keybase.translate((Octave.KeyBaseOffsets[self.Key],0,0))
 
     def Extension(self):
-        key = cq.Workplane().box(self.Width, self.ExtendedLength, KeyCommon.Height) \
-            .translate((0, -(self.MountLength+self.ExtendedLength/2), 0))
+        keyextend = cq.Workplane().box(self.Width, self.ExtendedLength, KeyCommon.Height)
 
-        return key#.translate((self.Width/2,0,0))
+        return keyextend.translate((0, -(self.KeyBaseLength+self.ExtendedLength/2), 0))
 
     def GetPosition(self):
         return (self.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
@@ -112,14 +108,14 @@ class WhiteKey(object):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255)})
 
 class BlackKey(object):
-    MountLength = 60-Octave.KeySpacing
-    MountWidth = Octave.Width/12-Octave.KeySpacing
+    KeyBaseLength = 60-Octave.KeySpacing
+    KeyBaseWidth = Octave.Width/12-Octave.KeySpacing
 
     def __init__(self, key):
         self.Key = key
 
     def Obj(self):
-        key = KeyCommon(self.MountLength, self.MountWidth).Obj()
+        key = KeyCommon(self.KeyBaseLength, self.KeyBaseWidth).Obj()
         return key
 
     def GetPosition(self):
@@ -129,6 +125,7 @@ class BlackKey(object):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(20,20,20)})
 
 
+#Initialize the positioning of all the white keys
 Octave.KeyOffsets = {
     "C":Octave.KeySpacing/2 + 0*Octave.Width/7,
     "D":Octave.KeySpacing/2 + 1*Octave.Width/7,
@@ -139,41 +136,51 @@ Octave.KeyOffsets = {
     "B":Octave.KeySpacing/2 + 6*Octave.Width/7,
 }
 
-#Global position of the left side of each key
+#Calculate the global position of the left side of each key
 Octave.KeyLeft = {}
 for key, offset in Octave.KeyOffsets.items():
-    Octave.KeyLeft[key] = offset - WhiteKey.Width/2 + BlackKey.MountWidth/2
+    Octave.KeyLeft[key] = offset - WhiteKey.Width/2 + BlackKey.KeyBaseWidth/2
 
-#Global position of the right side of each key
+#Calculate the global position of the right side of each key
 Octave.KeyRight = {}
 for key, offset in Octave.KeyOffsets.items():
-    Octave.KeyRight[key] = offset + WhiteKey.Width/2 - BlackKey.MountWidth/2
+    Octave.KeyRight[key] = offset + WhiteKey.Width/2 - BlackKey.KeyBaseWidth/2
 
-Octave.BaseWidths = {
+#Default sizing of the mounts
+Octave.KeyBaseWidths = {
     "C":Octave.Width/12-Octave.KeySpacing,
-    "D":Octave.Width/12-Octave.KeySpacing,
+    # "D":Octave.Width/12-Octave.KeySpacing,
     "E":Octave.Width/12-Octave.KeySpacing,
     "F":Octave.Width/12-Octave.KeySpacing,
-    "G":Octave.Width/12-Octave.KeySpacing,
-    "A":Octave.Width/12-Octave.KeySpacing,
+    # "G":Octave.Width/12-Octave.KeySpacing,
+    # "A":Octave.Width/12-Octave.KeySpacing,
     "B":Octave.Width/12-Octave.KeySpacing,
 }
 
-Octave.KeyOffsets["C#"] = Octave.KeyLeft["C"] + BlackKey.MountWidth + Octave.KeySpacing
-Octave.KeyOffsets["D#"] = Octave.KeyRight["E"] - BlackKey.MountWidth - Octave.KeySpacing
-Octave.KeyOffsets["F#"] = Octave.KeyLeft["F"] + BlackKey.MountWidth + Octave.KeySpacing
+#Offsets of the black keys calculated relative to the white keys
+Octave.KeyOffsets["C#"] = Octave.KeyLeft["C"] + BlackKey.KeyBaseWidth + Octave.KeySpacing
+Octave.KeyOffsets["D#"] = Octave.KeyRight["E"] - BlackKey.KeyBaseWidth - Octave.KeySpacing
+Octave.KeyOffsets["F#"] = Octave.KeyLeft["F"] + BlackKey.KeyBaseWidth + Octave.KeySpacing
 Octave.KeyOffsets["G#"] = Octave.KeyOffsets["G"] + WhiteKey.Width/2 + Octave.KeySpacing/2
-Octave.KeyOffsets["A#"] = Octave.KeyRight["B"] - BlackKey.MountWidth - Octave.KeySpacing
+Octave.KeyOffsets["A#"] = Octave.KeyRight["B"] - BlackKey.KeyBaseWidth - Octave.KeySpacing
 
-Octave.BaseOffsets = {
-    "C":-WhiteKey.Width/2 + Octave.BaseWidths["C"]/2,
+#Offsets from the key extension to place the base. (white keys only)
+# #Calculation is relative to rectangle centers 
+Octave.KeyBaseOffsets = {
+    "C":-WhiteKey.Width/2 + Octave.KeyBaseWidths["C"]/2,
     "D":0,
-    "E":WhiteKey.Width/2 - Octave.BaseWidths["E"]/2,
-    "F":-WhiteKey.Width/2 + Octave.BaseWidths["F"]/2,
-    "G":-Octave.BaseWidths["G"]/4,
-    "A":Octave.BaseWidths["A"]/4,
-    "B":WhiteKey.Width/2 - Octave.BaseWidths["B"]/2,
+    "E":WhiteKey.Width/2 - Octave.KeyBaseWidths["E"]/2,
+    "F":-WhiteKey.Width/2 + Octave.KeyBaseWidths["F"]/2,
+    "G":(Octave.KeyOffsets["F#"]+Octave.KeyOffsets["G#"])/2 - Octave.KeyOffsets["G"],
+    "A":(Octave.KeyOffsets["G#"]+Octave.KeyOffsets["A#"])/2 - Octave.KeyOffsets["A"],
+    "B":WhiteKey.Width/2 - Octave.KeyBaseWidths["B"]/2,
 }
+
+#Adjust widths based on the black key positioning
+#The size is the distance between the two keys, minus the 2x the spacing
+Octave.KeyBaseWidths["D"] = Octave.KeyOffsets["D#"]-Octave.KeyOffsets["C#"] - BlackKey.KeyBaseWidth - Octave.KeySpacing*2
+Octave.KeyBaseWidths["G"] = Octave.KeyOffsets["G#"]-Octave.KeyOffsets["F#"] - BlackKey.KeyBaseWidth - Octave.KeySpacing*2
+Octave.KeyBaseWidths["A"] = Octave.KeyOffsets["A#"]-Octave.KeyOffsets["G#"] - BlackKey.KeyBaseWidth - Octave.KeySpacing*2
 
 
 class Base(object):
