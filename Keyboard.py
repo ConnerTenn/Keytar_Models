@@ -19,22 +19,22 @@ class Octave(object):
 
     def Show(self):
         self.Keys = [
-            CKey(),
-            BlackKey(),
-            DKey(),
-            BlackKey(),
-            EKey(),
-            FKey(),
-            BlackKey(),
-            GKey(),
-            BlackKey(),
-            AKey(),
-            BlackKey(),
-            BKey()
+            WhiteKey("C"),
+            BlackKey("C#"),
+            WhiteKey("D"),
+            BlackKey("D#"),
+            WhiteKey("E"),
+            WhiteKey("F"),
+            BlackKey("F#"),
+            WhiteKey("G"),
+            BlackKey("G#"),
+            WhiteKey("A"),
+            BlackKey("A#"),
+            WhiteKey("B")
         ]
 
-        for i, key in enumerate(self.Keys):
-            key.Show(i)
+        for key in self.Keys:
+            key.Show()
 
 
 class KeyCommon(object):
@@ -80,138 +80,100 @@ class KeyCommon(object):
         return cut
 
 
-class BlackKey(object):
-    MountLength = 60-Octave.KeySpacing
-    MountWidth = Octave.Width/12-Octave.KeySpacing
-
-    def Obj(self):
-        key = KeyCommon(self.MountLength, self.MountWidth).Obj()
-        return key
-
-    def Show(self, i):
-        show_object(self.Obj().translate((i*Octave.Width/12+KeyCommon.Width/2, 0, 0)), options={"color":(20,20,20)})
-
 class WhiteKey(object):
     MountLength = 60
-    MountWidth = Octave.Width/12-Octave.KeySpacing
     ExtendedLength = 40
     Width = Octave.Width/7-Octave.KeySpacing
 
-    def Obj(self): None
+    def __init__(self, key):
+        self.Key = key
 
-    def Base(self):
-        key = KeyCommon(self.MountLength, self.MountWidth).Obj()
+
+    def Obj(self):
+        key = self.Base() + self.Extension()
 
         return key
+
+    def Base(self):
+        key = KeyCommon(self.MountLength, Octave.BaseWidths[self.Key]).Obj()
+
+        return key.translate((Octave.BaseOffsets[self.Key],0,0))
 
     def Extension(self):
         key = cq.Workplane().box(self.Width, self.ExtendedLength, KeyCommon.Height) \
             .translate((0, -(self.MountLength+self.ExtendedLength/2), 0))
 
-        return key#.translate((KeyCommon.Width/2,0,0))
+        return key#.translate((self.Width/2,0,0))
 
-    def GetPosition(self): None
+    def GetPosition(self):
+        return (self.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
-    def Show(self, i):
+    def Show(self):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255)})
 
-class CKey(WhiteKey):
-    ExtensionOffset = WhiteKey.Width/2-KeyCommon.Width/2
+class BlackKey(object):
+    MountLength = 60-Octave.KeySpacing
+    MountWidth = Octave.Width/12-Octave.KeySpacing
+
+    def __init__(self, key):
+        self.Key = key
 
     def Obj(self):
-        key = super().Base() + super().Extension().translate((self.ExtensionOffset, 0, 0))
+        key = KeyCommon(self.MountLength, self.MountWidth).Obj()
         return key
 
-    Left = 0 + Octave.KeySpacing/2
-    Position = Left + WhiteKey.Width/2 - ExtensionOffset
-    Right = Left + WhiteKey.Width + Octave.KeySpacing/2
-
     def GetPosition(self):
-        return (self.Position, 0, 0)
+        return (WhiteKey.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
-class DKey(WhiteKey):
-    ExtensionOffset = 0
+    def Show(self):
+        show_object(self.Obj().translate(self.GetPosition()), options={"color":(20,20,20)})
 
-    def Obj(self):
-        key = super().Base() + super().Extension()
-        return key
 
-    Left = CKey.Right + Octave.KeySpacing/2
-    Position = Left + WhiteKey.Width/2 - ExtensionOffset
-    Right = Left + WhiteKey.Width + Octave.KeySpacing/2
+Octave.KeyOffsets = {
+    "C":Octave.KeySpacing/2 + 0*Octave.Width/7,
+    "D":Octave.KeySpacing/2 + 1*Octave.Width/7,
+    "E":Octave.KeySpacing/2 + 2*Octave.Width/7,
+    "F":Octave.KeySpacing/2 + 3*Octave.Width/7,
+    "G":Octave.KeySpacing/2 + 4*Octave.Width/7,
+    "A":Octave.KeySpacing/2 + 5*Octave.Width/7,
+    "B":Octave.KeySpacing/2 + 6*Octave.Width/7,
+}
 
-    def GetPosition(self):
-        return (self.Position, 0, 0)
+#Global position of the left side of each key
+Octave.KeyLeft = {}
+for key, offset in Octave.KeyOffsets.items():
+    Octave.KeyLeft[key] = offset - WhiteKey.Width/2 + BlackKey.MountWidth/2
 
-class EKey(WhiteKey):
-    ExtensionOffset = -WhiteKey.Width/2+KeyCommon.Width/2
+#Global position of the right side of each key
+Octave.KeyRight = {}
+for key, offset in Octave.KeyOffsets.items():
+    Octave.KeyRight[key] = offset + WhiteKey.Width/2 - BlackKey.MountWidth/2
 
-    def Obj(self):
-        key = super().Base() + super().Extension().translate((self.ExtensionOffset, 0, 0))
-        return key
+Octave.BaseWidths = {
+    "C":Octave.Width/12-Octave.KeySpacing,
+    "D":Octave.Width/12-Octave.KeySpacing,
+    "E":Octave.Width/12-Octave.KeySpacing,
+    "F":Octave.Width/12-Octave.KeySpacing,
+    "G":Octave.Width/12-Octave.KeySpacing,
+    "A":Octave.Width/12-Octave.KeySpacing,
+    "B":Octave.Width/12-Octave.KeySpacing,
+}
 
-    Left = DKey.Right + Octave.KeySpacing/2
-    Position = Left + WhiteKey.Width/2 - ExtensionOffset
-    Right = Left + WhiteKey.Width + Octave.KeySpacing/2
+Octave.KeyOffsets["C#"] = Octave.KeyLeft["C"] + BlackKey.MountWidth + Octave.KeySpacing
+Octave.KeyOffsets["D#"] = Octave.KeyRight["E"] - BlackKey.MountWidth - Octave.KeySpacing
+Octave.KeyOffsets["F#"] = Octave.KeyLeft["F"] + BlackKey.MountWidth + Octave.KeySpacing
+Octave.KeyOffsets["G#"] = Octave.KeyOffsets["G"] + WhiteKey.Width/2 + Octave.KeySpacing/2
+Octave.KeyOffsets["A#"] = Octave.KeyRight["B"] - BlackKey.MountWidth - Octave.KeySpacing
 
-    def GetPosition(self):
-        return (self.Position, 0, 0)
-
-class FKey(WhiteKey):
-    ExtensionOffset = WhiteKey.Width/2-KeyCommon.Width/2
-
-    def Obj(self):
-        key = super().Base() + super().Extension().translate((self.ExtensionOffset, 0, 0))
-        return key
-
-    Left = EKey.Right + Octave.KeySpacing/2
-    Position = Left + WhiteKey.Width/2 - ExtensionOffset
-    Right = Left + WhiteKey.Width + Octave.KeySpacing/2
-
-    def GetPosition(self):
-        return (self.Position, 0, 0)
-
-class GKey(WhiteKey):
-    ExtensionOffset = WhiteKey.Width/2-KeyCommon.Width/2-KeyCommon.Width/4
-
-    def Obj(self):
-        key = super().Base() + super().Extension().translate((self.ExtensionOffset, 0, 0))
-        return key
-
-    Left = FKey.Right + Octave.KeySpacing/2
-    Position = Left + WhiteKey.Width/2 - ExtensionOffset
-    Right = Left + WhiteKey.Width + Octave.KeySpacing/2
-
-    def GetPosition(self):
-        return (self.Position, 0, 0)
-
-class AKey(WhiteKey):
-    ExtensionOffset = -WhiteKey.Width/2+KeyCommon.Width/2+KeyCommon.Width/4
-
-    def Obj(self):
-        key = super().Base() + super().Extension().translate((self.ExtensionOffset, 0, 0))
-        return key
-
-    Left = GKey.Right + Octave.KeySpacing/2
-    Position = Left + WhiteKey.Width/2 - ExtensionOffset
-    Right = Left + WhiteKey.Width + Octave.KeySpacing/2
-
-    def GetPosition(self):
-        return (self.Position, 0, 0)
-
-class BKey(WhiteKey):
-    ExtensionOffset = -WhiteKey.Width/2+KeyCommon.Width/2
-
-    def Obj(self):
-        key = super().Base() + super().Extension().translate((self.ExtensionOffset, 0, 0))
-        return key
-
-    Left = AKey.Right + Octave.KeySpacing/2
-    Position = Left + WhiteKey.Width/2 - ExtensionOffset
-    Right = Left + WhiteKey.Width + Octave.KeySpacing/2
-
-    def GetPosition(self):
-        return (self.Position, 0, 0)
+Octave.BaseOffsets = {
+    "C":-WhiteKey.Width/2 + Octave.BaseWidths["C"]/2,
+    "D":0,
+    "E":WhiteKey.Width/2 - Octave.BaseWidths["E"]/2,
+    "F":-WhiteKey.Width/2 + Octave.BaseWidths["F"]/2,
+    "G":-Octave.BaseWidths["G"]/4,
+    "A":Octave.BaseWidths["A"]/4,
+    "B":WhiteKey.Width/2 - Octave.BaseWidths["B"]/2,
+}
 
 
 class Base(object):
