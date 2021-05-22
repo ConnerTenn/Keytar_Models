@@ -131,10 +131,29 @@ class BlackKey(object):
 
     def __init__(self, key):
         self.Key = key
+        self.Common = KeyCommon(self.KeyBaseLength, self.KeyBaseWidth)
+        self.TotalLength = self.Common.TotalLength
+
 
     def Obj(self):
-        key = KeyCommon(self.KeyBaseLength, self.KeyBaseWidth).Obj()
+        key = self.Common.Obj()
+        key = self.Keytop(key)
+
         return key
+
+    TopWidth = KeyBaseWidth-3
+    TopLength = KeyBaseLength-3
+    TopHeight = 10
+
+    def Keytop(self, key):
+        top = key.faces(">Z").workplane(centerOption="CenterOfBoundBox") \
+            .center(0,(self.KeyBaseLength+KeyCommon.HiddenLength)/2 - KeyCommon.HiddenLength - self.KeyBaseLength/2) \
+            .rect(self.KeyBaseWidth, self.KeyBaseLength) \
+            .workplane(offset=self.TopHeight) \
+            .move(0,self.KeyBaseLength/2-self.TopLength/2).rect(self.TopWidth, self.TopLength) \
+            .loft()
+        #.center(0,(self.KeyBaseLength+KeyCommon.HiddenLength)/2-KeyCommon.HiddenLength)
+        return top
 
     def GetPosition(self):
         return cq.Vector(WhiteKey.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
