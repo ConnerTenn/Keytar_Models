@@ -13,23 +13,22 @@ class Octave(object):
     Width = 24*7
     KeySpacing = 1.5
 
-    def __new__(self):
-        self = super().__new__(self)
+    def Obj(self):
 
         self.Keys = [
-            CKey(),
-            BlackKey(),
-            DKey(),
-            BlackKey(),
-            EKey(),
-            FKey(),
-            BlackKey(),
-            GKey(),
-            BlackKey(),
-            AKey(),
-            BlackKey(),
-            BKey(),
-            BlackKey()
+            CKey().Obj(),
+            BlackKey().Obj(),
+            DKey().Obj(),
+            BlackKey().Obj(),
+            EKey().Obj(),
+            FKey().Obj(),
+            BlackKey().Obj(),
+            GKey().Obj(),
+            BlackKey().Obj(),
+            AKey().Obj(),
+            BlackKey().Obj(),
+            BKey().Obj(),
+            BlackKey().Obj()
         ]
 
         for i, key in enumerate(self.Keys):
@@ -45,17 +44,16 @@ class Octave(object):
 
 
 class KeyCommon(object):
-    MountLength = 40
     HiddenLength = 50
     Width = Octave.Width/12-Octave.KeySpacing
     Height = 10
     WallThickness = 4
 
-    TotalLength = MountLength+HiddenLength
+    def __init__(self, mountlen):
+        self.MountLength = mountlen
+        self.TotalLength = self.MountLength+self.HiddenLength
 
-    def __new__(self):
-        self = super().__new__(self)
-
+    def Obj(self):
         common = cq.Workplane().box(self.Width, self.TotalLength, self.Height) \
             .translate((0,self.TotalLength/2-self.MountLength,0))
 
@@ -89,65 +87,51 @@ class KeyCommon(object):
 
 
 class BlackKey(object):
-    def __new__(self):
-        self = super().__new__(self)
+    MountLength = 35
 
-        key = KeyCommon()
+    def Obj(self):
+        key = KeyCommon(self.MountLength).Obj()
         return key
 
-class CKey(object):
-    def __new__(self):
-        self = super().__new__(self)
+class WhiteKey(object):
+    MountLength = 40
 
-        key = KeyCommon()
+class CKey(WhiteKey):
+    def Obj(self):
+        key = KeyCommon(self.MountLength).Obj()
         return key
 
-class DKey(object):
-    def __new__(self):
-        self = super().__new__(self)
-
-        key = KeyCommon()
+class DKey(WhiteKey):
+    def Obj(self):
+        key = KeyCommon(self.MountLength).Obj()
         return key
 
-class EKey(object):
-    def __new__(self):
-        self = super().__new__(self)
-
-        key = KeyCommon()
+class EKey(WhiteKey):
+    def Obj(self):
+        key = KeyCommon(self.MountLength).Obj()
         return key
 
-class FKey(object):
-    def __new__(self):
-        self = super().__new__(self)
-
-        key = KeyCommon()
+class FKey(WhiteKey):
+    def Obj(self):
+        key = KeyCommon(self.MountLength).Obj()
         return key
 
-class GKey(object):
-    def __new__(self):
-        self = super().__new__(self)
-
-        key = KeyCommon()
+class GKey(WhiteKey):
+    def Obj(self):
+        key = KeyCommon(self.MountLength).Obj()
         return key
 
-class AKey(object):
-    def __new__(self):
-        self = super().__new__(self)
-
-        key = KeyCommon()
+class AKey(WhiteKey):
+    def Obj(self):
+        key = KeyCommon(self.MountLength).Obj()
         return key
 
-class BKey(object):
-    def __new__(self):
-        self = super().__new__(self)
-
-        key = KeyCommon()
+class BKey(WhiteKey):
+    def Obj(self):
+        key = KeyCommon(self.MountLength).Obj()
         return key
 
 
-common = KeyCommon()
-show_object(common)
-
-octave = Octave()
+octave = Octave().Obj()
 octave.Show()
 
