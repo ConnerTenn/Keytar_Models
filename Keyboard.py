@@ -13,6 +13,7 @@ if "show_object" not in globals():
 
 WallThickness = 4
 Small = 1e-5
+ExportFolder = "Export/"
 
 BitSize = 3
 
@@ -39,6 +40,10 @@ class Octave(object):
     def Show(self):
         for key in self.Keys:
             key.Show()
+    
+    def Export(self):
+        for key in self.Keys:
+            cq.exporters.export(key.Obj, ExportFolder+key.Key+".stl")
 
 
 class KeyCommon(object):
@@ -54,7 +59,6 @@ class KeyCommon(object):
         self.Width = keybaseWidth
         self.TotalLength = self.KeyBaseLength+self.HiddenLength
 
-    def Obj(self):
         common = cq.Workplane().box(self.Width, self.TotalLength, self.Height) \
             .translate((0,self.TotalLength/2-self.KeyBaseLength,0))
 
@@ -62,7 +66,7 @@ class KeyCommon(object):
         common = self.SpacerCut(common)
         common = self.PivotCut(common)
 
-        return common
+        self.Obj = common
 
 
     PivotPos = cq.Vector(25, 0) #offset from center
@@ -102,14 +106,12 @@ class WhiteKey(object):
     def __init__(self, key):
         self.Key = key
 
+        keyobj = self.KeyBase() + self.Extension()
 
-    def Obj(self):
-        key = self.KeyBase() + self.Extension()
-
-        return key
+        self.Obj = keyobj
 
     def KeyBase(self):
-        keybase = KeyCommon(self.KeyBaseLength, Octave.KeyBaseWidths[self.Key]).Obj()
+        keybase = KeyCommon(self.KeyBaseLength, Octave.KeyBaseWidths[self.Key]).Obj
 
         return keybase.translate((Octave.KeyBaseOffsets[self.Key], 0, 0))
 
@@ -122,7 +124,7 @@ class WhiteKey(object):
         return cq.Vector(self.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
     def Show(self):
-        show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255), "alpha":0})
+        show_object(self.Obj.translate(self.GetPosition()), options={"color":(255,255,255), "alpha":0})
 
 #Black key is positioned relative to the center of the white key
 class BlackKey(object):
@@ -131,15 +133,14 @@ class BlackKey(object):
 
     def __init__(self, key):
         self.Key = key
+
         self.Common = KeyCommon(self.KeyBaseLength, self.KeyBaseWidth)
         self.TotalLength = self.Common.TotalLength
+        
+        keyobj = self.Common.Obj
+        keyobj = self.Keytop(keyobj)
 
-
-    def Obj(self):
-        key = self.Common.Obj()
-        key = self.Keytop(key)
-
-        return key
+        self.Obj = keyobj
 
     TopWidth = KeyBaseWidth-3
     TopLength = KeyBaseLength-3
@@ -159,7 +160,7 @@ class BlackKey(object):
         return cq.Vector(WhiteKey.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
     def Show(self):
-        show_object(self.Obj().translate(self.GetPosition()), options={"color":(20,20,20), "alpha":0})
+        show_object(self.Obj.translate(self.GetPosition()), options={"color":(20,20,20), "alpha":0})
 
 
 #Initialize the positioning of all the white keys
@@ -226,7 +227,7 @@ class KeySpacer(object):
     WallThick = 3
     Gap = 0.2
 
-    def Obj(self):
+    def __init__(self):
         align = cq.Workplane("YZ").move(KeyCommon.PivotPos.x, 0) \
         .move(self.WallSize+5, self.Gap) \
         .line(0, KeyCommon.Travel-self.Gap) \
@@ -243,7 +244,7 @@ class KeySpacer(object):
                 cq.selectors.NearestToPointSelector((0,KeyCommon.PivotPos.x+1,0))
             )).fillet(BitSize/2)
 
-        return align
+        self.Obj = align
 
     def PivotCut(self):
         spikeHeight = 7
@@ -260,7 +261,8 @@ class KeySpacer(object):
 class Base(object):
     Height = WallThickness
     Width = Octave.Width+5
-    def Obj(self):
+
+    def __init__(self):
         base = cq.Workplane().box(self.Width, KeyCommon.TotalLength, self.Height) \
             .translate((0, KeyCommon.HiddenLength-KeyCommon.TotalLength/2, 0))
 
@@ -273,7 +275,7 @@ class Base(object):
             ()
         )).fillet(BitSize/2-Small)
 
-        return base
+        self.Obj = base
 
     def Pivot(self):
         spikeHeight = 7
@@ -290,7 +292,7 @@ class Base(object):
     def ShowKeySpacers(self):
         pos = self.GetPosition() + cq.Vector((-Octave.Width/2, 0, self.Height/2))
 
-        spacer = KeySpacer().Obj()
+        spacer = KeySpacer().Obj
 
         show_object(spacer.translate(
             cq.Vector(Octave.KeyOffsets["C"]-Octave.KeySpacing/2, 0, 0) + pos
@@ -349,21 +351,31 @@ class Base(object):
         return cq.Vector(Octave.Width/2, 0, -KeyCommon.Height/2-self.Height/2-KeyCommon.Travel)
 
     def Show(self):
-        show_object(self.Obj().translate(self.GetPosition()), options={"color":(0,127,127)})
+        show_object(self.Obj.translate(self.GetPosition()), options={"color":(0,127,127)})
 
         self.ShowKeySpacers()
 
+    def Export(self):
+        cq.exporters.export(self.Obj, ExportFolder+"KeyboardBase.stl")
+
+
 t2 = time.time()
-Octave().Show()
+octave = Octave()
+octave.Show()
 t3 = time.time()
-Base().Show()
+base = Base()
+base.Show()
 t4 = time.time()
+octave.Export()
+base.Export()
+t5 = time.time()
 
 print()
 print("Runtime:")
 print(F"    Initialize: {t2-t1:.6f}s")
 print(F"    Octave:     {t3-t2:.6f}s")
 print(F"    Base:       {t4-t3:.6f}s")
-print(F"    :: Total :: {t4-t1:.6f}s")
+print(F"    Export:     {t5-t4:.6f}s")
+print(F"    :: Total :: {t5-t1:.6f}s")
 print()
 
