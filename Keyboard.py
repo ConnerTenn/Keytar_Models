@@ -58,6 +58,7 @@ class KeyCommon(object):
 
         common -= self.PivotCut()
         common -= self.SpringCut()
+        common -= self.SpacerCut(common)
 
         return common
 
@@ -68,6 +69,15 @@ class KeyCommon(object):
         cut = cq.Workplane("YZ").move(self.PivotPos.x, self.PivotPos.y) \
             .line(10,-10).line(-20,0).close() \
             .extrude(self.Width/2, both=True)
+
+        return cut
+
+    def SpacerCut(self, common):
+        width = (KeySpacer.WallThick-Octave.KeySpacing)/2+KeySpacer.Gap
+        cut = common.faces(">Z").workplane().move(-self.Width/2+width/2, self.PivotPos.x) \
+            .rect(width,KeySpacer.WallSize*2+5*2+5).mirrorY() \
+            .extrude(-self.Height, combine=False)
+        
 
         return cut
 
@@ -111,7 +121,7 @@ class WhiteKey(object):
         return cq.Vector(self.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
     def Show(self):
-        show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255), "alpha":0.5})
+        show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255), "alpha":0})
 
 #Black key is positioned relative to the center of the white key
 class BlackKey(object):
@@ -129,7 +139,7 @@ class BlackKey(object):
         return cq.Vector(WhiteKey.Width/2+Octave.KeyOffsets[self.Key], 0, 0)
 
     def Show(self):
-        show_object(self.Obj().translate(self.GetPosition()), options={"color":(20,20,20), "alpha":0.5})
+        show_object(self.Obj().translate(self.GetPosition()), options={"color":(20,20,20), "alpha":0})
 
 
 #Initialize the positioning of all the white keys
