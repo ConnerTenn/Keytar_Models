@@ -11,7 +11,7 @@ if "show_object" not in globals():
     show_object = func
 
 
-WallThickness = 4
+WallThickness = 3
 Small = 1e-5
 ExportFolder = "Export/"
 
@@ -108,6 +108,8 @@ class WhiteKey(object):
 
         keyobj = self.KeyBase() + self.Extension()
 
+        keyobj = keyobj.faces("<Z").faces("<Y").shell(-WallThickness)
+
         self.Obj = keyobj
 
     def KeyBase(self):
@@ -139,6 +141,8 @@ class BlackKey(object):
         
         keyobj = self.Common.Obj
         keyobj = self.Keytop(keyobj)
+
+        keyobj = keyobj.faces("<Z").faces("<Y").shell(-WallThickness)
 
         self.Obj = keyobj
 
@@ -259,7 +263,7 @@ class KeySpacer(object):
 
 
 class Base(object):
-    Height = WallThickness
+    Height = 4
     Width = Octave.Width+5
 
     def __init__(self):
