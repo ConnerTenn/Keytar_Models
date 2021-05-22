@@ -39,7 +39,11 @@ class Octave(object):
 
 class KeyCommon(object):
     HiddenLength = 50
+    TotalLength = 150
+    ExposedLength = TotalLength-HiddenLength
     Height = 10
+
+    Travel = 10
 
     def __init__(self, keybaseLength, keybaseWidth):
         self.KeyBaseLength = keybaseLength
@@ -78,8 +82,8 @@ class KeyCommon(object):
 
 
 class WhiteKey(object):
-    KeyBaseLength = 60
     ExtendedLength = 40
+    KeyBaseLength = KeyCommon.ExposedLength-ExtendedLength
     Width = Octave.Width/7-Octave.KeySpacing
 
     def __init__(self, key):
@@ -108,7 +112,7 @@ class WhiteKey(object):
         show_object(self.Obj().translate(self.GetPosition()), options={"color":(255,255,255)})
 
 class BlackKey(object):
-    KeyBaseLength = 60-Octave.KeySpacing
+    KeyBaseLength = WhiteKey.KeyBaseLength-Octave.KeySpacing
     KeyBaseWidth = Octave.Width/12-Octave.KeySpacing
 
     def __init__(self, key):
@@ -186,12 +190,15 @@ Octave.KeyBaseWidths["A"] = Octave.KeyOffsets["A#"]-Octave.KeyOffsets["G#"] - Bl
 class Base(object):
     Height = WallThickness
     def Obj(self):
-        base = cq.Workplane().box(Octave.Width, KeyCommon.HiddenLength+WhiteKey.ExtendedLength, self.Height)
+        base = cq.Workplane().box(Octave.Width, KeyCommon.TotalLength, self.Height)
 
-        return base.translate((Octave.Width/2,0,-KeyCommon.Height/2-self.Height/2-10))
+        return base
+
+    def GetPosition(self):
+        return (Octave.Width/2, KeyCommon.HiddenLength-KeyCommon.TotalLength/2, -KeyCommon.Height/2-self.Height/2-KeyCommon.Travel)
 
     def Show(self):
-        show_object(self.Obj(), options={"color":(127,127,127)})
+        show_object(self.Obj().translate(self.GetPosition()), options={"color":(0,127,127)})
 
 
 Octave().Show()
