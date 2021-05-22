@@ -27,8 +27,7 @@ class Octave(object):
             BlackKey().Obj(),
             AKey().Obj(),
             BlackKey().Obj(),
-            BKey().Obj(),
-            BlackKey().Obj()
+            BKey().Obj()
         ]
 
         for i, key in enumerate(self.Keys):
@@ -40,7 +39,6 @@ class Octave(object):
     def Show(self):
         for key in self.Keys:
             show_object(key)
-
 
 
 class KeyCommon(object):
@@ -87,48 +85,61 @@ class KeyCommon(object):
 
 
 class BlackKey(object):
-    MountLength = 35
+    MountLength = 60-Octave.KeySpacing
 
     def Obj(self):
         key = KeyCommon(self.MountLength).Obj()
         return key
 
 class WhiteKey(object):
-    MountLength = 40
+    MountLength = 60
+    ExtendedLength = 40
+    Width = Octave.Width/7-Octave.KeySpacing
+
+    def Base(self):
+        key = KeyCommon(self.MountLength).Obj()
+
+        return key
+
+    def Extension(self):
+        key = cq.Workplane().box(self.Width, self.ExtendedLength, KeyCommon.Height) \
+            .translate((0, -(self.MountLength+self.ExtendedLength/2), 0))
+
+        return key
 
 class CKey(WhiteKey):
     def Obj(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = super().Base() + super().Extension().translate((self.Width/2-KeyCommon.Width/2, 0, 0))
         return key
 
 class DKey(WhiteKey):
     def Obj(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = super().Base() + super().Extension()
         return key
 
 class EKey(WhiteKey):
     def Obj(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = super().Base() + super().Extension().translate((-self.Width/2+KeyCommon.Width/2, 0, 0))
         return key
 
 class FKey(WhiteKey):
     def Obj(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = super().Base() + super().Extension().translate((self.Width/2-KeyCommon.Width/2, 0, 0))
         return key
 
 class GKey(WhiteKey):
     def Obj(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = super().Base() + super().Extension().translate((self.Width/2-KeyCommon.Width/2-KeyCommon.Width/4, 0, 0))
         return key
 
 class AKey(WhiteKey):
     def Obj(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = super().Base() + super().Extension().translate((-self.Width/2+KeyCommon.Width/2+KeyCommon.Width/4, 0, 0))
         return key
 
 class BKey(WhiteKey):
     def Obj(self):
-        key = KeyCommon(self.MountLength).Obj()
+        key = super().Base() + super().Extension().translate((-self.Width/2+KeyCommon.Width/2, 0, 0))
         return key
 
 
