@@ -17,32 +17,24 @@ class Octave(object):
     Width = 24*7
     KeySpacing = 1.5
 
-    def Obj(self):
-
+    def Show(self):
         self.Keys = [
-            CKey().Obj(),
-            BlackKey().Obj(),
-            DKey().Obj(),
-            BlackKey().Obj(),
-            EKey().Obj(),
-            FKey().Obj(),
-            BlackKey().Obj(),
-            GKey().Obj(),
-            BlackKey().Obj(),
-            AKey().Obj(),
-            BlackKey().Obj(),
-            BKey().Obj()
+            CKey(),
+            BlackKey(),
+            DKey(),
+            BlackKey(),
+            EKey(),
+            FKey(),
+            BlackKey(),
+            GKey(),
+            BlackKey(),
+            AKey(),
+            BlackKey(),
+            BKey()
         ]
 
         for i, key in enumerate(self.Keys):
-            self.Keys[i] = key.translate((i*self.Width/12,0,0))
-
-        return self
-
-
-    def Show(self):
-        for key in self.Keys:
-            show_object(key)
+            key.Show(i)
 
 
 class KeyCommon(object):
@@ -96,11 +88,16 @@ class BlackKey(object):
         key = KeyCommon(self.MountLength, self.MountWidth).Obj()
         return key
 
+    def Show(self, i):
+        show_object(self.Obj().translate((i*Octave.Width/12,0,0)), options={"color":(20,20,20)})
+
 class WhiteKey(object):
     MountLength = 60
     MountWidth = Octave.Width/12-Octave.KeySpacing
     ExtendedLength = 40
     Width = Octave.Width/7-Octave.KeySpacing
+
+    def Obj(self): None
 
     def Base(self):
         key = KeyCommon(self.MountLength, self.MountWidth).Obj()
@@ -112,6 +109,9 @@ class WhiteKey(object):
             .translate((0, -(self.MountLength+self.ExtendedLength/2), 0))
 
         return key.translate((KeyCommon.Width/2,0,0))
+
+    def Show(self, i):
+        show_object(self.Obj().translate((i*Octave.Width/12,0,0)), options={"color":(255,255,255)})
 
 class CKey(WhiteKey):
     def Obj(self):
@@ -156,10 +156,10 @@ class Base(object):
 
         return base.translate((Octave.Width/2,0,-KeyCommon.Height/2-self.Height/2-10))
 
+    def Show(self):
+        show_object(self.Obj(), options={"color":(127,127,127)})
 
-octave = Octave().Obj()
-octave.Show()
 
-base = Base().Obj()
-show_object(base)
+Octave().Show()
+Base().Show()
 
