@@ -201,11 +201,12 @@ class BlackKey(object):
     TopHeight = 10
 
     def Keytop(self, key):
+        length = self.KeyBaseLength-1
         top = key.faces(">Z").workplane(centerOption="CenterOfBoundBox") \
-            .center(0,(self.KeyBaseLength+KeyCommon.HiddenLength)/2 - KeyCommon.HiddenLength - self.KeyBaseLength/2) \
-            .rect(self.KeyBaseWidth, self.KeyBaseLength) \
+            .center(0,(self.KeyBaseLength+KeyCommon.HiddenLength)/2 - KeyCommon.HiddenLength - (self.KeyBaseLength+self.KeyBaseLength-length)/2) \
+            .rect(self.KeyBaseWidth, length) \
             .workplane(offset=self.TopHeight) \
-            .move(0,self.KeyBaseLength/2-self.TopLength/2).rect(self.TopWidth, self.TopLength) \
+            .move(0,length/2-self.TopLength/2).rect(self.TopWidth, self.TopLength) \
             .loft()
         #.center(0,(self.KeyBaseLength+KeyCommon.HiddenLength)/2-KeyCommon.HiddenLength)
         return top
@@ -331,7 +332,7 @@ class KeySpacer(object):
 
 class Base(object):
     Height = 4
-    Width = Octave.Width+5
+    Width = Octave.Width+KeySpacer.WallThick+KeySpacer.Gap*2
 
     def __init__(self):
         base = cq.Workplane().box(self.Width, KeyCommon.TotalLength, self.Height) \
@@ -339,6 +340,7 @@ class Base(object):
 
         base = self.SpringCuts(base)
         base += self.Pivot()
+        base += self.KeyStopMount()
 
         # Fillet along Pivot
         base = base.edges(cq.selectors.BoxSelector(
@@ -368,6 +370,17 @@ class Base(object):
                 .cutThruAll()
 
         return base
+
+    def KeyStopMount(self):
+        width = KeyCommon.PivotPos.x+KeySpacer.WallSize
+
+        mount = cq.Workplane("XY").move(self.Width/2+WallThickness/2, width/2) \
+            .rect(WallThickness, width).mirrorY() \
+            .extrude(self.Height+KeyCommon.Travel)
+
+        # show_object(mount)
+
+        return mount.translate((0,0,-self.Height/2))
 
 
     def ShowKeySpacers(self):
@@ -402,6 +415,25 @@ class Base(object):
         cq.exporters.export(self.Obj, ExportFolder+"KeyboardBase.stl")
 
 
+class KeyStop:
+    Width = WallThickness*5
+    def __init__(self):
+
+        keystop = cq.Workplane().box(Base.Width+WallThickness*2, self.Width, WallThickness) \
+            .faces("<Z").workplane().move(Base.Width/2+WallThickness/2, 0) \
+            .rect(WallThickness, self.Width).mirrorY() \
+            .extrude(KeyCommon.Height)
+
+        self.Obj = keystop
+
+
+    def GetPosition(self):
+        return cq.Vector(Octave.Width/2, self.Width/2, KeyCommon.Height/2+WallThickness/2)
+
+    def Show(self):
+        show_object(self.Obj.translate(self.GetPosition()), options={"color":(50,127,127)})
+
+
 print()
 print("Runtime:")
 
@@ -422,6 +454,10 @@ base.Show()
 #= SpringHolder =
 holder = SpringHolder()
 holder.Show()
+
+#= KeyStop =
+keystop = KeyStop()
+keystop.Show()
 
 t4 = time.time()
 print(F"    Base:       {t4-t3:.6f}s")
