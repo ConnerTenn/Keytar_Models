@@ -339,53 +339,15 @@ class Base(object):
             cq.Vector(Octave.GlobalKeyMountPos["C"]-Octave.KeyBaseWidths["C"]/2-Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["C"]+Octave.KeyBaseWidths["C"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["C#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["D"]+Octave.KeyBaseWidths["D"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["D#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["E"]+Octave.KeyBaseWidths["E"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["F"]+Octave.KeyBaseWidths["F"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["F#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["G"]+Octave.KeyBaseWidths["G"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["G#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["A"]+Octave.KeyBaseWidths["A"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["A#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["B"]+Octave.KeyBaseWidths["B"]/2+Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
+        for key in Octave.KeyList:
+            if not "#" in key:
+                show_object(spacer.translate(
+                    cq.Vector(Octave.GlobalKeyMountPos[key]+Octave.KeyBaseWidths[key]/2+Octave.KeySpacing/2, 0, 0) + pos
+                ), options={"alpha":0.5})
+            else:
+                show_object(spacer.translate(
+                    cq.Vector(Octave.GlobalKeyMountPos[key]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
+                ), options={"alpha":0.5})
 
 
     def GetPosition(self):
