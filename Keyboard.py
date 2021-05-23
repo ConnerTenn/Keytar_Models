@@ -138,8 +138,11 @@ class KeyCommon(object):
     SpringPos = HiddenLength-WallThickness-SpringHolder.SpringHoleDiam/2-2
 
     def SpringCut(self, common):
+        width = self.Width/2 - SpringHolder.SpringHoleDiam/2
+        length = self.HiddenLength-self.SpringPos
         cut = common.faces(">Z").workplane() \
-            .move(SpringHolder.SpringHoleDiam/2+0.5, self.SpringPos).circle(SpringHolder.SpringHoleDiam/2).mirrorY() \
+            .move(self.Width/2-width/2, self.SpringPos + length/2) \
+            .rect(width, length).mirrorY() \
             .cutThruAll()
 
         return cut
