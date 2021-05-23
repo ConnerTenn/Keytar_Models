@@ -55,6 +55,45 @@ class Octave(object):
             cq.exporters.export(key.Obj, ExportFolder+key.Key+".stl")
 
 
+class SpringHolder(object):
+    Gap = 0.2
+    HolderLength = 5
+
+    SpringDiameter = 3
+    SpringHoleDiam = SpringDiameter+1
+
+    def __init__(self):
+        holder = cq.Workplane("XY") \
+            .circle(self.SpringHoleDiam/2-self.Gap).extrude(-self.HolderLength-self.SpringDiameter) \
+            .faces(">Z").workplane() \
+            .circle(self.SpringHoleDiam/2+1).extrude(3)
+
+        #Cuts along both sides
+        holder = holder.faces("<Z").workplane() \
+            .move(-self.SpringHoleDiam/2+(self.SpringHoleDiam/3)/4, -self.SpringHoleDiam/2+(self.SpringHoleDiam*2/3)/2) \
+            .rect(self.SpringHoleDiam/3, self.SpringHoleDiam*2/3).mirrorY().cutBlind(-self.SpringDiameter/2)
+        
+        #Cutout for spring holder
+        holder = holder.faces("<Z").workplane().transformed(rotate=(-90,-90,0)) \
+            .move(-self.SpringHoleDiam/2+(self.SpringHoleDiam*2/3)/2, self.SpringDiameter/2+2/2) \
+            .rect(self.SpringHoleDiam*2/3, 2).cutThruAll(5)
+
+        #Shave down one side
+        holder = holder.faces("<Z").workplane().transformed(rotate=(-90,-90,0)) \
+            .move(-self.SpringHoleDiam/2+(self.SpringHoleDiam/3)/4, (self.SpringDiameter/2+2)/2) \
+            .rect(self.SpringHoleDiam/3, self.SpringDiameter/2+2).cutThruAll(5)
+
+        self.Obj = holder
+    
+    def Show(self):
+        # show_object(self.Obj.translate((0,0,50)))
+        show_object(
+            self.Obj.mirror("XY").rotate((0,0,0), (0,0,1), 180).translate(
+                (Octave.GlobalKeyMountPos["C"]-(self.SpringHoleDiam/2+0.5), KeyCommon.SpringPos, -KeyCommon.Travel-KeyCommon.Height/2-Base.Height)
+            )
+        )
+
+
 class KeyCommon(object):
     HiddenLength = 50
     TotalLength = 150
@@ -96,13 +135,11 @@ class KeyCommon(object):
         return cut
 
 
-    SpringDiameter = 3
-    SpringHoleDiam = SpringDiameter+1
-    SpringPos = HiddenLength-WallThickness-SpringHoleDiam/2-2
+    SpringPos = HiddenLength-WallThickness-SpringHolder.SpringHoleDiam/2-2
 
     def SpringCut(self, common):
         cut = common.faces(">Z").workplane() \
-            .move(self.SpringHoleDiam/2+0.5, self.SpringPos).circle(self.SpringHoleDiam/2).mirrorY() \
+            .move(SpringHolder.SpringHoleDiam/2+0.5, self.SpringPos).circle(SpringHolder.SpringHoleDiam/2).mirrorY() \
             .cutThruAll()
 
         return cut
@@ -324,7 +361,7 @@ class Base(object):
         for key in Octave.KeyList:
             base = base.faces(">Z").workplane(centerOption="CenterOfBoundBox") \
                 .center(Octave.GlobalKeyMountPos[key]-Octave.Width/2, KeyCommon.TotalLength/2-KeyCommon.HiddenLength) \
-                .move(KeyCommon.SpringHoleDiam/2+0.5, KeyCommon.SpringPos).circle(KeyCommon.SpringHoleDiam/2).mirrorY() \
+                .move(SpringHolder.SpringHoleDiam/2+0.5, KeyCommon.SpringPos).circle(SpringHolder.SpringHoleDiam/2).mirrorY() \
                 .cutThruAll()
 
         return base
@@ -378,6 +415,10 @@ print(F"    Octave:     {t3-t2:.6f}s")
 #= Base =
 base = Base()
 base.Show()
+
+#= SpringHolder =
+holder = SpringHolder()
+holder.Show()
 
 t4 = time.time()
 print(F"    Base:       {t4-t3:.6f}s")
