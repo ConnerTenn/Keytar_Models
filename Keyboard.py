@@ -387,23 +387,34 @@ class Base(object):
         cq.exporters.export(self.Obj, ExportFolder+"KeyboardBase.stl")
 
 
-t2 = time.time()
-octave = Octave()
-octave.Show()
-t3 = time.time()
-base = Base()
-base.Show()
-t4 = time.time()
-octave.Export()
-base.Export()
-t5 = time.time()
-
 print()
 print("Runtime:")
+
+t2 = time.time()
 print(F"    Initialize: {t2-t1:.6f}s")
+
+#= Octave =
+octave = Octave()
+octave.Show()
+
+t3 = time.time()
 print(F"    Octave:     {t3-t2:.6f}s")
+
+#= Base =
+base = Base()
+base.Show()
+
+t4 = time.time()
 print(F"    Base:       {t4-t3:.6f}s")
+
+#= Export =
+octave.Export()
+base.Export()
+
+#= Results =
+t5 = time.time()
 print(F"    Export:     {t5-t4:.6f}s")
+
 print(F"    :: Total :: {t5-t1:.6f}s")
 print()
 
