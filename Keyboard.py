@@ -21,6 +21,13 @@ class Octave(object):
     Width = 24*7
     KeySpacing = 1.5
 
+    KeyOffsets = {}
+    KeyLeft = {}
+    KeyRight = {}
+    KeyBaseWidths = {}
+    KeyBaseOffsets = {}
+    GlobalKeyMountPos ={}
+
     def __init__(self):
         self.Keys = [
             WhiteKey("C"),
@@ -225,6 +232,23 @@ Octave.KeyBaseWidths["G"] = Octave.KeyOffsets["G#"]-Octave.KeyOffsets["F#"] - Bl
 Octave.KeyBaseWidths["A"] = Octave.KeyOffsets["A#"]-Octave.KeyOffsets["G#"] - BlackKey.KeyBaseWidth - Octave.KeySpacing*2
 
 
+#Global positions of the center of the mounts of each key
+Octave.GlobalKeyMountPos ={
+    "C":Octave.KeyOffsets["C"]+Octave.KeyBaseOffsets["C"]+ WhiteKey.Width/2,
+    "C#":Octave.KeyOffsets["C#"] + WhiteKey.Width/2,
+    "D":Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+ WhiteKey.Width/2,
+    "D#":Octave.KeyOffsets["D#"] + WhiteKey.Width/2,
+    "E":Octave.KeyOffsets["E"]+Octave.KeyBaseOffsets["E"]+ WhiteKey.Width/2,
+    "F":Octave.KeyOffsets["F"]+Octave.KeyBaseOffsets["F"]+ WhiteKey.Width/2,
+    "F#":Octave.KeyOffsets["F#"] + WhiteKey.Width/2,
+    "G":Octave.KeyOffsets["G"]+Octave.KeyBaseOffsets["G"]+ WhiteKey.Width/2,
+    "G#":Octave.KeyOffsets["G#"] + WhiteKey.Width/2,
+    "A":Octave.KeyOffsets["A"]+Octave.KeyBaseOffsets["A"]+ WhiteKey.Width/2,
+    "A#":Octave.KeyOffsets["A#"] + WhiteKey.Width/2,
+    "B":Octave.KeyOffsets["B"]+Octave.KeyBaseOffsets["B"]+ WhiteKey.Width/2
+}
+
+
 class KeySpacer(object):
 
     WallSize = 7
@@ -299,55 +323,55 @@ class Base(object):
         spacer = KeySpacer().Obj
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["C"]-Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["C"]-Octave.KeyBaseWidths["C"]/2-Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["C"]+Octave.KeyBaseWidths["C"]+Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["C"]+Octave.KeyBaseWidths["C"]/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2-Octave.KeyBaseWidths["D"]/2-Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["C#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["D"]+Octave.KeyBaseOffsets["D"]+WhiteKey.Width/2+Octave.KeyBaseWidths["D"]/2+Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["D"]+Octave.KeyBaseWidths["D"]/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["E"]+WhiteKey.Width-Octave.KeyBaseWidths["E"]-Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["D#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["F"]-Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["E"]+Octave.KeyBaseWidths["E"]/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["F"]+Octave.KeyBaseWidths["F"]+Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["F"]+Octave.KeyBaseWidths["F"]/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]-Octave.KeyBaseWidths["G"]/2-Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["F#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["G"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["G"]+Octave.KeyBaseWidths["G"]/2+Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["G"]+Octave.KeyBaseWidths["G"]/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]-Octave.KeyBaseWidths["A"]/2-Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["G#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["A"]+WhiteKey.Width/2+Octave.KeyBaseOffsets["A"]+Octave.KeyBaseWidths["A"]/2+Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["A"]+Octave.KeyBaseWidths["A"]/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["B"]+WhiteKey.Width-Octave.KeyBaseWidths["B"]-Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["A#"]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
         show_object(spacer.translate(
-            cq.Vector(Octave.KeyOffsets["B"]+WhiteKey.Width+Octave.KeySpacing/2, 0, 0) + pos
+            cq.Vector(Octave.GlobalKeyMountPos["B"]+Octave.KeyBaseWidths["B"]/2+Octave.KeySpacing/2, 0, 0) + pos
         ), options={"alpha":0.5})
 
 
