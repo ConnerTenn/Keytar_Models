@@ -93,6 +93,9 @@ class SpringHolder(object):
             )
         )
 
+    def Export(self):
+        cq.exporters.export(self.Obj, ExportFolder+"SpringHolder.stl")
+
 
 class KeyCommon(object):
     HiddenLength = 50
@@ -329,6 +332,27 @@ class KeySpacer(object):
         
         return pivot
 
+    def ShowKeySpacers(self, base):
+        pos = base.GetPosition() + cq.Vector((-Octave.Width/2, 0, base.Height/2))
+
+        show_object(self.Obj.translate(
+            cq.Vector(Octave.GlobalKeyMountPos["C"]-Octave.KeyBaseWidths["C"]/2-Octave.KeySpacing/2, 0, 0) + pos
+        ), options={"alpha":0.5})
+
+        for key in Octave.KeyList:
+            if not "#" in key:
+                show_object(self.Obj.translate(
+                    cq.Vector(Octave.GlobalKeyMountPos[key]+Octave.KeyBaseWidths[key]/2+Octave.KeySpacing/2, 0, 0) + pos
+                ), options={"alpha":0.5})
+            else:
+                show_object(self.Obj.translate(
+                    cq.Vector(Octave.GlobalKeyMountPos[key]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
+                ), options={"alpha":0.5})
+
+    def Export(self):
+        cq.exporters.export(self.Obj, ExportFolder+"KeySpacer.stl")
+
+
 
 class Base(object):
     Height = 4
@@ -383,33 +407,11 @@ class Base(object):
         return mount.translate((0,0,-self.Height/2))
 
 
-    def ShowKeySpacers(self):
-        pos = self.GetPosition() + cq.Vector((-Octave.Width/2, 0, self.Height/2))
-
-        spacer = KeySpacer().Obj
-
-        show_object(spacer.translate(
-            cq.Vector(Octave.GlobalKeyMountPos["C"]-Octave.KeyBaseWidths["C"]/2-Octave.KeySpacing/2, 0, 0) + pos
-        ), options={"alpha":0.5})
-
-        for key in Octave.KeyList:
-            if not "#" in key:
-                show_object(spacer.translate(
-                    cq.Vector(Octave.GlobalKeyMountPos[key]+Octave.KeyBaseWidths[key]/2+Octave.KeySpacing/2, 0, 0) + pos
-                ), options={"alpha":0.5})
-            else:
-                show_object(spacer.translate(
-                    cq.Vector(Octave.GlobalKeyMountPos[key]+BlackKey.KeyBaseWidth/2+Octave.KeySpacing/2, 0, 0) + pos
-                ), options={"alpha":0.5})
-
-
     def GetPosition(self):
         return cq.Vector(Octave.Width/2, 0, -KeyCommon.Height/2-self.Height/2-KeyCommon.Travel)
 
     def Show(self):
         show_object(self.Obj.translate(self.GetPosition()), options={"color":(0,127,127)})
-
-        self.ShowKeySpacers()
 
     def Export(self):
         cq.exporters.export(self.Obj, ExportFolder+"KeyboardBase.stl")
@@ -433,43 +435,55 @@ class KeyStop:
     def Show(self):
         show_object(self.Obj.translate(self.GetPosition()), options={"color":(50,127,127)})
 
+    def Export(self):
+        cq.exporters.export(self.Obj, ExportFolder+"KeyStop.stl")
+
 
 print()
 print("Runtime:")
 
-t2 = time.time()
-print(F"    Initialize: {t2-t1:.6f}s")
+t2 = time.time(); print(F"    Initialize:   {t2-t1:.6f}s")
 
 #= Octave =
 octave = Octave()
 octave.Show()
 
-t3 = time.time()
-print(F"    Octave:     {t3-t2:.6f}s")
+t3 = time.time(); print(F"    Octave:       {t3-t2:.6f}s")
 
 #= Base =
 base = Base()
 base.Show()
 
+t4 = time.time(); print(F"    Base:         {t4-t3:.6f}s")
+
+#= Spacers =
+spacer = KeySpacer()
+spacer.ShowKeySpacers(base)
+
+t5 = time.time(); print(F"    Spacers:      {t5-t4:.6f}s")
+
 #= SpringHolder =
 holder = SpringHolder()
 holder.Show()
+
+t6 = time.time(); print(F"    SpringHolder: {t6-t5:.6f}s")
 
 #= KeyStop =
 keystop = KeyStop()
 keystop.Show()
 
-t4 = time.time()
-print(F"    Base:       {t4-t3:.6f}s")
+t7 = time.time(); print(F"    Keystop:      {t7-t6:.6f}s")
 
 #= Export =
 octave.Export()
 base.Export()
+spacer.Export()
+holder.Export()
+keystop.Export()
 
 #= Results =
-t5 = time.time()
-print(F"    Export:     {t5-t4:.6f}s")
+t8 = time.time(); print(F"    Export:       {t8-t7:.6f}s")
 
-print(F"    :: Total :: {t5-t1:.6f}s")
+print(F"    :: Total ::   {t8-t1:.6f}s")
 print()
 
