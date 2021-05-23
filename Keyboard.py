@@ -21,6 +21,8 @@ class Octave(object):
     Width = 24*7
     KeySpacing = 1.5
 
+    KeyList = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
+
     KeyOffsets = {}
     KeyLeft = {}
     KeyRight = {}
@@ -95,11 +97,12 @@ class KeyCommon(object):
 
 
     SpringDiameter = 3
-    SpringPos = HiddenLength-WallThickness-(SpringDiameter+1)/2-2
+    SpringHoleDiam = SpringDiameter+1
+    SpringPos = HiddenLength-WallThickness-SpringHoleDiam/2-2
 
     def SpringCut(self, common):
         cut = common.faces(">Z").workplane() \
-            .move(self.SpringDiameter, self.SpringPos).circle((self.SpringDiameter+1)/2).mirrorY() \
+            .move(self.SpringHoleDiam/2+0.5, self.SpringPos).circle(self.SpringHoleDiam/2).mirrorY() \
             .cutThruAll()
 
         return cut
@@ -294,6 +297,7 @@ class Base(object):
         base = cq.Workplane().box(self.Width, KeyCommon.TotalLength, self.Height) \
             .translate((0, KeyCommon.HiddenLength-KeyCommon.TotalLength/2, 0))
 
+        base = self.SpringCuts(base)
         base += self.Pivot()
 
         # Fillet along Pivot
@@ -315,6 +319,15 @@ class Base(object):
             .extrude(self.Width/2, both=True)
         
         return pivot
+
+    def SpringCuts(self, base):
+        for key in Octave.KeyList:
+            base = base.faces(">Z").workplane(centerOption="CenterOfBoundBox") \
+                .center(Octave.GlobalKeyMountPos[key]-Octave.Width/2, KeyCommon.TotalLength/2-KeyCommon.HiddenLength) \
+                .move(KeyCommon.SpringHoleDiam/2+0.5, KeyCommon.SpringPos).circle(KeyCommon.SpringHoleDiam/2).mirrorY() \
+                .cutThruAll()
+
+        return base
 
 
     def ShowKeySpacers(self):
